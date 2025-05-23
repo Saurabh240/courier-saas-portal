@@ -1,0 +1,1 @@
+const CustomerDashboard = () => <h2>Customer Dashboard</h2>; export default CustomerDashboard;

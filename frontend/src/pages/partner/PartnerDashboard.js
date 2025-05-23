@@ -1,0 +1,1 @@
+const PartnerDashboard = () => <h2>Delivery Partner Dashboard</h2>; export default PartnerDashboard;
