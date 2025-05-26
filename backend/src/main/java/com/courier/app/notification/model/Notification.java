@@ -1,6 +1,6 @@
 package com.courier.app.notification.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class Notification {

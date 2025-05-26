@@ -1,6 +1,6 @@
 package com.courier.app.eta.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class Eta {

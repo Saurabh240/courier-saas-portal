@@ -1,6 +1,6 @@
 package com.courier.app.auth.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class Auth {
