@@ -1,11 +1,11 @@
 package com.courier.app.usermgmt.controller;
 
-import com.courier.app.config.JwtUtil;
 import com.courier.app.usermgmt.dto.LoginRequest;
 import com.courier.app.usermgmt.dto.RegisterRequest;
 import com.courier.app.usermgmt.dto.UserResponse;
 import com.courier.app.usermgmt.model.User;
 import com.courier.app.usermgmt.repository.UserRepository;
+import com.courier.app.usermgmt.security.JwtUtil;
 import com.courier.app.usermgmt.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;

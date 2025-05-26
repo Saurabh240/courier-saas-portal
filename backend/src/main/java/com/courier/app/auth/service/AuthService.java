@@ -1,0 +1,9 @@
+package com.courier.app.auth.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+
+    // TODO: Business logic goes here
+}

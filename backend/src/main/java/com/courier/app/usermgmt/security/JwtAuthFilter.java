@@ -1,4 +1,4 @@
-package com.courier.app.config;
+package com.courier.app.usermgmt.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
