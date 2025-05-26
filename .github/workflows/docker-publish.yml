@@ -24,7 +24,12 @@ jobs:
       - name: Dump env for debug (TEMP)
         run: printenv
 
-      - name: Build and push backend
+      - name: Build backend JAR
+        run: |
+          cd backend
+          ./mvnw clean package -DskipTests
+
+      - name: Build and push backend image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/courier-backend:latest ./backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/courier-backend:latest
