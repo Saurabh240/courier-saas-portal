@@ -4,10 +4,6 @@ on:
   push:
     branches: [ main ]
 
-env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,15 +18,15 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
-          password: ${{ env.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push backend
         run: |
-          docker build -t $DOCKERHUB_USERNAME/courier-backend:latest ./backend
-          docker push $DOCKERHUB_USERNAME/courier-backend:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/courier-backend:latest ./backend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/courier-backend:latest
 
       - name: Build and push frontend
         run: |
-          docker build -t $DOCKERHUB_USERNAME/courier-frontend:latest ./frontend
-          docker push $DOCKERHUB_USERNAME/courier-frontend:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/courier-frontend:latest ./frontend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/courier-frontend:latest
