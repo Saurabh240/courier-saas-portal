@@ -27,7 +27,7 @@ jobs:
       - name: Build backend JAR
         run: |
           cd backend
-          ./mvnw clean package -DskipTests
+          mvn clean package -DskipTests
 
       - name: Build and push backend image
         run: |
