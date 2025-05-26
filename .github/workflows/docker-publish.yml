@@ -21,9 +21,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Dump env for debug (TEMP)
-        run: printenv
-
       - name: Build backend JAR
         run: |
           cd backend
@@ -36,5 +33,5 @@ jobs:
 
       - name: Build and push frontend
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/courier-frontend:latest ./frontend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/courier-frontend:latest -f frontend/Dockerfile frontend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/courier-frontend:latest
