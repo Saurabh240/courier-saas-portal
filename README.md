@@ -107,6 +107,21 @@ Frontend runs at:
 `http://localhost:3000`
 
 ---
+## User Credential with Roles
+
+* ✅ ADMIN
+  admin@gmail.com
+  Admin@123
+* ✅ STAFF
+  staff@gmail.com
+  Staff@123
+* ✅ DELIVERY_PARTNER
+  delivery_partner@gmail.com
+  Delivery@123
+* ✅ CUSTOMER
+  customer@gmail.com
+  Customer@123
+
 
 ## 🔑 Authentication Info
 

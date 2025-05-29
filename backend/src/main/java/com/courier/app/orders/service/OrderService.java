@@ -1,0 +1,83 @@
+package com.courier.app.orders.service;
+
+
+import com.courier.app.orders.model.Order;
+import com.courier.app.orders.model.OrderRequest;
+import com.courier.app.orders.model.OrderResponse;
+import com.courier.app.orders.model.OrderStatus;
+import com.courier.app.orders.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
+
+@Service
+public class OrderService {
+    @Autowired
+    private OrderRepository repository;
+
+    @Value("${upload.dir:uploads}")
+    private String uploadDir;
+
+    public OrderResponse createOrder(OrderRequest request) {
+        Order order = new Order();
+        order.setCustomerEmail(request.customerEmail());
+        order.setSenderName(request.senderName());
+        order.setReceiverName(request.receiverName());
+        order.setPickupAddress(request.pickupAddress());
+        order.setDeliveryAddress(request.deliveryAddress());
+        return toResponse(repository.save(order));
+    }
+
+    public List<OrderResponse> getAllOrders() {
+        return repository.findAll().stream().map(this::toResponse).toList();
+    }
+
+    public List<OrderResponse> getOrdersForCustomer(String email) {
+        return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
+    }
+
+    public List<OrderResponse> getOrdersForPartner(String email) {
+        return repository.findByAssignedPartnerEmail(email).stream().map(this::toResponse).toList();
+    }
+
+    public OrderResponse assignPartner(Long orderId, String partnerEmail) {
+        Order order = repository.findById(orderId).orElseThrow();
+        order.setAssignedPartnerEmail(partnerEmail);
+        return toResponse(repository.save(order));
+    }
+
+    public OrderResponse updateStatus(Long orderId, OrderStatus status) {
+        Order order = repository.findById(orderId).orElseThrow();
+        order.setStatus(status);
+        return toResponse(repository.save(order));
+    }
+
+    public OrderResponse uploadProof(Long orderId, MultipartFile file) throws IOException {
+        Order order = repository.findById(orderId).orElseThrow();
+        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath);
+        String uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/uploads/").path(fileName).toUriString();
+        order.setDeliveryProofPath(uri);
+        order.setStatus(OrderStatus.DELIVERED);
+        return toResponse(repository.save(order));
+    }
+
+    private OrderResponse toResponse(Order order) {
+        return new OrderResponse(order.getId(), order.getCustomerEmail(), order.getSenderName(), order.getReceiverName(), order.getPickupAddress(), order.getDeliveryAddress(), order.getStatus(), order.getAssignedPartnerEmail(), order.getCreatedAt(), order.getDeliveryProofPath());
+    }
+}
