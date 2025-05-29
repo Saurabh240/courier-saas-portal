@@ -20,7 +20,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
           <Route path="/staff" element={<PrivateRoute role="STAFF"><StaffDashboard /></PrivateRoute>} />
-          <Route path="/partner" element={<PrivateRoute role="PARTNER"><PartnerDashboard /></PrivateRoute>} />
+          <Route path="/partner" element={<PrivateRoute role="DELIVERY_PARTNER"><PartnerDashboard /></PrivateRoute>} />
           <Route path="/customer" element={<PrivateRoute role="CUSTOMER"><CustomerDashboard /></PrivateRoute>} />
         </Routes>
       </Router>

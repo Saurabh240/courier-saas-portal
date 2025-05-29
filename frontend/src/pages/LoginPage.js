@@ -13,7 +13,7 @@ const LoginPage = () => {
       <h2>Login as:</h2>
       <button onClick={() => handleLogin('ADMIN')}>Admin</button>
       <button onClick={() => handleLogin('STAFF')}>Staff</button>
-      <button onClick={() => handleLogin('PARTNER')}>Delivery Partner</button>
+      <button onClick={() => handleLogin('DELIVERY_PARTNER')}>Delivery Partner</button>
       <button onClick={() => handleLogin('CUSTOMER')}>Customer</button>
     </div>
   );
