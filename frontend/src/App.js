@@ -6,6 +6,7 @@ import PartnerDashboard from './Pages/partner/PartnerDashboard';
 import CustomerDashboard from './Pages/customer/CustomerDashboard';
 import LoginPage from './Pages/LoginPage';
 import { AuthProvider, useAuth } from './Context/AuthContext';
+import SignUp from './Pages/SignUp';
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
           <Route path="/staff" element={<PrivateRoute role="STAFF"><StaffDashboard /></PrivateRoute>} />
