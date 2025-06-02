@@ -1,10 +1,17 @@
-FROM node:18-alpine AS build
+FROM node:18-alpine
+
+# Set working directory
 WORKDIR /app
+
+# Copy package.json and install dependencies
 COPY package*.json ./
 RUN npm install
-COPY . .
-RUN npm run build
 
-FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
-EXPOSE 80
+# Copy the rest of the source code
+COPY . .
+
+# Expose the development port
+EXPOSE 3000
+
+# Start the dev server
+CMD ["npm", "start"]
