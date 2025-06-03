@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function SignUp() {
+const SignUp = () =>  {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -117,3 +117,4 @@ export default function SignUp() {
     </div>
   );
 }
+export default SignUp;

@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import AdminDashboard from './Pages/admin/AdminDashboard';
-import StaffDashboard from './Pages/staff/StaffDashboard';
-import PartnerDashboard from './Pages/partner/PartnerDashboard';
-import CustomerDashboard from './Pages/customer/CustomerDashboard';
-import LoginPage from './Pages/LoginPage';
-import { AuthProvider, useAuth } from './Context/AuthContext';
-import SignUp from './Pages/SignUp';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import StaffDashboard from './pages/staff/StaffDashboard';
+import PartnerDashboard from './pages/partner/PartnerDashboard';
+import CustomerDashboard from './pages/customer/CustomerDashboard';
+import LoginPage from './pages/LoginPage';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import SignUp from './pages/SignUp'
 
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
