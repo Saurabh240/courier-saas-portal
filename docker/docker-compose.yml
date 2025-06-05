@@ -35,7 +35,7 @@ services:
       environment:
         - NODE_ENV=development
         - CHOKIDAR_USEPOLLING=true
-      command: npm run start
+      command: npm start
 
 #  frontend:
 #    image: saurabh896/courier-frontend:latest
