@@ -1,28 +1,39 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { FaUser, FaLock } from "react-icons/fa";
 
 const LoginPage = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // updated to email for API compatibility
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Logging in:', { username, password });
-    // login(username, password); // Uncomment this if using AuthContext logic
+    try {
+      const response = await axios.post('http://localhost:8080/api/users/login', {
+        email,
+        password
+      });
+
+      console.log('Login successful:', response.data);
+
+      // Optional: store token in localStorage if your backend sends it
+      // localStorage.setItem('token', response.data.token);
+
+      // Redirect after successful login
+      navigate('/dashboard'); // change to your actual route
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
+      alert('Login failed. Please check your credentials.');
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-blue-200 p-10">
         <div className="flex justify-center mb-6">
-          <img
-            src="/logo.png" // Replace with your actual logo path
-            alt="Logo"
-            className="w-16 h-16"
-          />
+          <img src="/logo.png" alt="Logo" className="w-16 h-16" />
         </div>
 
         <h2 className="text-3xl font-extrabold text-center text-gray-800">
@@ -33,21 +44,21 @@ const LoginPage = () => {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username */}
+          {/* Email Input */}
           <div className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:border-blue-500 transition focus-within:ring-2 focus-within:ring-blue-400 bg-white">
             <FaUser className="text-blue-500 text-lg" />
             <input
-              type="text"
-              name="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
+              type="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
               className="w-full bg-transparent outline-none text-sm"
               required
             />
           </div>
 
-          {/* Password */}
+          {/* Password Input */}
           <div className="flex items-center gap-3 px-4 py-3 border border-gray-300 rounded-xl shadow-sm hover:border-blue-500 transition focus-within:ring-2 focus-within:ring-blue-400 bg-white">
             <FaLock className="text-blue-500 text-lg" />
             <input
@@ -61,7 +72,6 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Remember Me and Forgot Password */}
           <div className="flex justify-between items-center text-sm text-gray-600">
             <label className="flex items-center">
               <input type="checkbox" className="mr-2 accent-blue-600" />
@@ -72,7 +82,6 @@ const LoginPage = () => {
             </Link>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-lg transition duration-300"
@@ -81,7 +90,6 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Link to Sign Up */}
         <div className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{' '}
           <Link to="/signup" className="text-blue-600 hover:underline">

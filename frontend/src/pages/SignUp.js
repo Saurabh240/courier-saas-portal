@@ -12,7 +12,7 @@ import {
 const SignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: "",
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -25,20 +25,39 @@ const SignUp = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
 
-    const routeMap = {
-      Admin: "/admin",
-      Staff: "/staff",
-      Customer: "/customer",
-      Partener: "/partner",
-    };
-    navigate(routeMap[formData.userType]);
+    try {
+      const response = await fetch("http://localhost:8080/api/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: "Customer", // Or any fixed/default role
+        }),
+      });
+
+      if (response.ok) {
+        alert("Signup successful!");
+        navigate("/login");
+      } else {
+        const errData = await response.json();
+        alert("Signup failed: " + (errData.message || "Server error"));
+      }
+    } catch (error) {
+      console.error("Error during signup:", error);
+      alert("Network error. Please try again later.");
+    }
   };
 
   const InputField = ({ icon: Icon, ...props }) => (
@@ -74,9 +93,9 @@ const SignUp = () => {
           <FaUserAlt className="text-blue-600" />
           <input
             type="text"
-            name="fullName"
+            name="name"
             placeholder="Full Name"
-            value={formData.fullName}
+            value={formData.name}
             onChange={handleChange}
             className="w-full bg-transparent outline-none text-sm"
             required
