@@ -7,6 +7,7 @@ import com.courier.app.usermgmt.dto.UserResponse;
 import com.courier.app.usermgmt.model.User;
 import com.courier.app.usermgmt.repository.UserRepository;
 import com.courier.app.usermgmt.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public UserResponse register(@RequestBody RegisterRequest req) {
+    public UserResponse register(@Valid @RequestBody RegisterRequest req) {
         return service.register(req);
     }
 
