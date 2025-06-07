@@ -18,11 +18,38 @@ const LoginPage = () => {
 
       console.log('Login successful:', response.data);
 
-      // Optional: store token in localStorage if your backend sends it
-      // localStorage.setItem('token', response.data.token);
+      const token = response.data.token;
+      localStorage.setItem("token", token);
 
-      // Redirect after successful login
-      navigate('/dashboard'); // change to your actual route
+      const userResponse = await axios.get('http://localhost:8080/api/users', {
+        // Uncomment if authentication is required
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const user = userResponse.data;
+
+      if (!user || !user.userType) {
+        alert("Could not determine user type.");
+        return;
+      }
+
+      // Step 3: Redirect based on userType
+      switch (user.userType.toLowerCase()) {
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'staff':
+          navigate('/staff/dashboard');
+          break;
+        case 'customer':
+          navigate('/customer/dashboard');
+          break;
+        case 'partner':
+          navigate('/partner/dashboard');
+          break;
+        default:
+          alert('Unknown user type. Cannot redirect.');
+      }
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message);
       alert('Login failed. Please check your credentials.');
