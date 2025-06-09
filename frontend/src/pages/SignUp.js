@@ -73,7 +73,7 @@ const SignUp = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: "Customer",
+          role: "Customer", // Or any fixed/default role
         }),
       });
 
