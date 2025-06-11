@@ -31,7 +31,7 @@ const SignUp = () => {
     password: "",
     confirmPassword: "",
     contact: "",
-    userType: "Customer",
+    userType: "CUSTOMER",
   });
 
   const [toast, setToast] = useState(null);
@@ -73,7 +73,8 @@ const SignUp = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          role: "Customer", // Or any fixed/default role
+          contact: formData.contact,
+          role: "CUSTOMER", // Or any fixed/default role
         }),
       });
 
