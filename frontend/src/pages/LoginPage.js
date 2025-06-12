@@ -8,7 +8,7 @@ import Toast from "../components/Toast";
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setUser } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [toast, setToast] = useState(null); 
@@ -30,8 +30,7 @@ const LoginPage = () => {
         return;
       }
 
-      localStorage.setItem("token", token);
-      setUser({ role });
+      login({ token, role });
 
       setToast({ message: "Login successful!", type: "success" });
 

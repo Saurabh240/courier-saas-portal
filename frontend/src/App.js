@@ -1,13 +1,13 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import StaffDashboard from './pages/staff/StaffDashboard';
 import PartnerDashboard from './pages/partner/PartnerDashboard';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import SignUp from './pages/SignUp';
-import Home from './pages/Home';  // Import the Home component
-import { AuthProvider, useAuth } from './context/AuthContext';
+import Home from './pages/Home';
 import LoginPage from './pages/LoginPage';
+import { useAuth } from './context/AuthContext';
 
 // Protect routes based on role
 function PrivateRoute({ children, role }) {
@@ -37,28 +37,28 @@ function HomeRedirect() {
 }
 
 function App() {
+  const { loading } = useAuth(); 
+
+  if (loading) {
+    return <div className="text-center mt-10 text-gray-500">Loading...</div>; 
+  }
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Root route */}
-          <Route path="/" element={<HomeRedirect />} />
+    <Routes>
+      <Route path="/" element={<HomeRedirect />} />
 
-          {/* Public routes */}
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<LoginPage />} />
+      {/* Public routes */}
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/login" element={<LoginPage />} />
 
-          {/* Private routes */}
-          <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
-          <Route path="/staff" element={<PrivateRoute role="STAFF"><StaffDashboard /></PrivateRoute>} />
-          <Route path="/partner" element={<PrivateRoute role="DELIVERY_PARTNER"><PartnerDashboard /></PrivateRoute>} />
-          <Route path="/customer" element={<PrivateRoute role="CUSTOMER"><CustomerDashboard /></PrivateRoute>} />
+      {/* Private routes */}
+      <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
+      <Route path="/staff" element={<PrivateRoute role="STAFF"><StaffDashboard /></PrivateRoute>} />
+      <Route path="/partner" element={<PrivateRoute role="DELIVERY_PARTNER"><PartnerDashboard /></PrivateRoute>} />
+      <Route path="/customer" element={<PrivateRoute role="CUSTOMER"><CustomerDashboard /></PrivateRoute>} />
 
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+      {/* Catch-all fallback */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
