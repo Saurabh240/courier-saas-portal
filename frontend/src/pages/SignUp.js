@@ -73,7 +73,7 @@ const SignUp = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
-          contact: formData.contact,
+          phoneNo: formData.contact,
           role: "CUSTOMER", // Or any fixed/default role
         }),
       });
