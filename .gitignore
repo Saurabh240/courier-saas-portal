@@ -1,2 +1,3 @@
 /backend/target/**
-.idea/**
+.idea
+node_modules/**

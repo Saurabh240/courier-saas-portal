@@ -2,11 +2,13 @@ package com.courier.app.usermgmt.controller;
 
 import com.courier.app.config.JwtUtil;
 import com.courier.app.usermgmt.dto.LoginRequest;
+import com.courier.app.usermgmt.dto.LoginResponse;
 import com.courier.app.usermgmt.dto.RegisterRequest;
 import com.courier.app.usermgmt.dto.UserResponse;
 import com.courier.app.usermgmt.model.User;
 import com.courier.app.usermgmt.repository.UserRepository;
 import com.courier.app.usermgmt.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,15 +28,15 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public UserResponse register(@RequestBody RegisterRequest req) {
+    public UserResponse register(@Valid @RequestBody RegisterRequest req) {
         return service.register(req);
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest req) {
+    public LoginResponse login(@RequestBody LoginRequest req) {
         User user = repo.findByEmail(req.email).orElseThrow();
         if (encoder.matches(req.password, user.getPassword())) {
-            return JwtUtil.generateToken(user.getEmail(), user.getRole().name());
+            return new LoginResponse(JwtUtil.generateToken(user.getEmail(), user.getRole().name()),user.getRole());
         }
         throw new RuntimeException("Invalid credentials");
     }

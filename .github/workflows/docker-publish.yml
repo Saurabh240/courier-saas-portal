@@ -2,7 +2,8 @@ name: Build and Push Docker Images
 
 on:
   push:
-    branches: [ main ]
+    branches: 
+      - main
 
 jobs:
   build:
@@ -31,7 +32,7 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/courier-backend:latest ./backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/courier-backend:latest
 
-      - name: Build and push frontend
+      - name: Build and push frontend image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/courier-frontend:latest -f frontend/Dockerfile frontend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/courier-frontend:latest
