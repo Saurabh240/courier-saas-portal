@@ -1,122 +1,175 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Users,
-  ShoppingCart,
-  Settings,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Menu, LogOut } from "lucide-react";
+import { sidebarItems } from "../assets/sidebarMenu";
+import { useNavigate } from "react-router-dom";
 
 const SideBar = ({ userType }) => {
   const [openMenus, setOpenMenus] = useState({});
+  const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
-  const toggleSubMenu = (label) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [label]: !prev[label],
-    }));
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");     
+    localStorage.removeItem("refresh");   
+    navigate("/login");                   
   };
 
-  const items = {
-    admin: [
-      { label: "Dashboard", route: "/admin", icon: <LayoutDashboard size={18} /> },
-      {
-        label: "Users",
-        icon: <Users size={18} />,
-        children: [
-          { label: "Staff", route: "/admin/staff" },
-          { label: "Partners", route: "/admin/partners" },
-        ],
-      },
-      {
-        label: "Orders",
-        icon: <ShoppingCart size={18} />,
-        children: [
-          { label: "Pending", route: "/admin/orders/pending" },
-          { label: "Completed", route: "/admin/orders/completed" },
-        ],
-      },
-      { label: "Settings", route: "/admin/settings", icon: <Settings size={18} /> },
-    ],
-    customer: [
-      { label: "Dashboard", route: "/customer", icon: <LayoutDashboard size={18} /> },
-      {
-        label: "Orders",
-        icon: <ShoppingCart size={18} />,
-        children: [
-          { label: "My Orders", route: "/customer/orders" },
-          { label: "Track Order", route: "/customer/track" },
-        ],
-      },
-      { label: "Settings", route: "/customer/settings", icon: <Settings size={18} /> },
-    ],
-    staff: [
-      { label: "Dashboard", route: "/staff", icon: <LayoutDashboard size={18} /> },
-      { label: "Manage Tasks", route: "/staff/tasks", icon: <Users size={18} /> },
-      { label: "Settings", route: "/staff/settings", icon: <Settings size={18} /> },
-    ],
-    partner: [
-      { label: "Dashboard", route: "/partner", icon: <LayoutDashboard size={18} /> },
-      { label: "Deliveries", route: "/partner/deliveries", icon: <ShoppingCart size={18} /> },
-      { label: "Settings", route: "/partner/settings", icon: <Settings size={18} /> },
-    ],
-  };
+  const toggleSidebar = () => setCollapsed((prev) => !prev);
+  const items = sidebarItems;
 
   return (
-    <div className="w-64 h-screen bg-blue-900 text-white p-4 shadow-xl font-medium overflow-y-auto">
-      <h2 className="text-2xl font-semibold mb-6 text-center capitalize tracking-wide">
-        {userType} Panel
-      </h2>
-      <ul className="space-y-2 text-sm">
-        {items[userType]?.map((item) => (
-          <li key={item.label}>
-            {item.children ? (
-              <>
-                <button
-                  onClick={() => toggleSubMenu(item.label)}
-                  className="w-full flex items-center justify-between px-4 py-2 rounded hover:bg-blue-700 transition"
-                >
-                  <div className="flex items-center gap-2">
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </div>
-                  {openMenus[item.label] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-                {openMenus[item.label] && (
-                  <ul className="ml-6 mt-1 space-y-1 border-l border-blue-500 pl-2">
-                    {item.children.map((child) => (
-                      <li key={child.label}>
-                        <Link
-                          to={child.route}
-                          className={`block px-3 py-1 rounded hover:bg-blue-600 transition ${
-                            location.pathname === child.route ? "bg-blue-700" : ""
+    <div
+      className={`h-screen text-[#333] p-4 shadow-md transition-all duration-300 relative z-40 ${
+        collapsed ? "w-20" : "w-64"
+      }`}
+      style={{
+        backgroundColor: "#F3F6FD",
+        fontFamily: "'Poppins', sans-serif",
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        {!collapsed && (
+          <h2 className="text-xl font-bold tracking-wide text-[#333] capitalize">
+            {userType} Panel
+          </h2>
+        )}
+        <button onClick={toggleSidebar} className="text-[#333]">
+          <Menu />
+        </button>
+      </div>
+
+      {/* Menu List */}
+      <ul className="space-y-2 text-sm relative">
+        {items[userType]?.map((item) => {
+          const isActive = location.pathname === item.route;
+          const hasChildren = item.children && item.children.length > 0;
+
+          return (
+            <li key={item.label} className="relative group">
+              {hasChildren ? (
+                <>
+                  <button
+                    onClick={() =>
+                      !collapsed &&
+                      setOpenMenus((prev) => ({
+                        ...prev,
+                        [item.label]: !prev[item.label],
+                      }))
+                    }
+                    className={`w-full flex items-center ${
+                      collapsed ? "justify-center" : "justify-between"
+                    } px-3 py-2 rounded-lg hover:bg-[#E3EBFF] transition group`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {item.icon}
+                      {!collapsed && (
+                        <span
+                          className={`${
+                            isActive ? "font-semibold text-[#687FE5]" : "text-[#333]"
                           }`}
                         >
-                          {child.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            ) : (
-              <Link
-                to={item.route}
-                className={`flex items-center gap-2 px-4 py-2 rounded hover:bg-blue-700 transition ${
-                  location.pathname === item.route ? "bg-blue-800" : ""
-                }`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            )}
-          </li>
-        ))}
+                          {item.label}
+                        </span>
+                      )}
+                    </div>
+                    {!collapsed &&
+                      (openMenus[item.label] ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      ))}
+                  </button>
+
+                  {/* Collapsed floating submenu */}
+                  {collapsed ? (
+                    <ul className="absolute left-full top-0 mt-0 ml-2 bg-white text-black border shadow-lg rounded z-50 opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto pointer-events-none transition-all duration-200 min-w-max">
+                      {item.children.map((child) => (
+                        <li key={child.label}>
+                          <Link
+                            to={child.route}
+                            className={`block px-4 py-2 rounded whitespace-nowrap hover:bg-[#687FE5] hover:text-white transition ${
+                              location.pathname === child.route
+                                ? "bg-[#00CAFF] font-bold text-white"
+                                : ""
+                            }`}
+                          >
+                            {child.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    openMenus[item.label] && (
+                      <ul className="ml-6 mt-1 space-y-1 border-l border-[#687FE5]/40 pl-3">
+                        {item.children.map((child) => (
+                          <li key={child.label}>
+                            <Link
+                              to={child.route}
+                              className={`block px-4 py-1.5 rounded-md transition-all border-l-4 ${
+                                location.pathname === child.route
+                                  ? "bg-[#687FE5] text-white font-semibold border-[#00CAFF]"
+                                  : "text-[#333] border-transparent hover:bg-[#E3EBFF]"
+                              }`}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )
+                  )}
+                </>
+              ) : (
+                <Link
+                  to={item.route}
+                  className={`flex items-center ${
+                    collapsed ? "justify-center" : "gap-3"
+                  } px-3 py-2 rounded-lg transition group ${
+                    isActive
+                      ? "bg-[#687FE5] text-white font-semibold"
+                      : "hover:bg-[#E3EBFF] text-[#333]"
+                  }`}
+                >
+                  {item.icon}
+                  {!collapsed && <span>{item.label}</span>}
+
+                  {/* Tooltip for collapsed */}
+                  {collapsed && (
+                    <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-black text-white text-xs font-medium rounded shadow-md px-2 py-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition duration-300 whitespace-nowrap pointer-events-none group-hover:pointer-events-auto z-50">
+                      {item.label}
+                    </span>
+                  )}
+                </Link>
+              )}
+            </li>
+          );
+        })}
       </ul>
-      <hr className="mt-6 border-blue-700" />
+
+      {/* Logout Button */}
+      <div className="absolute bottom-4 left-0 w-full px-4">
+        <hr className="border-t border-[#687FE5]/30 mb-3" />
+        <button
+          onClick={handleLogout}
+          className={`w-full flex items-center ${
+            collapsed ? "justify-center" : "justify-start gap-2"
+          } px-3 py-2 rounded-lg text-[#E53935] hover:bg-red-100 transition group`}
+        >
+          <LogOut size={18} />
+          {!collapsed && <span className="text-sm font-medium">Logout</span>}
+
+          {/* Tooltip in collapsed mode */}
+          {collapsed && (
+            <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-black text-white text-xs font-medium rounded shadow-md px-2 py-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition duration-300 whitespace-nowrap pointer-events-none group-hover:pointer-events-auto z-50">
+              Logout
+            </span>
+          )}
+        </button>
+      </div>
     </div>
   );
 };
