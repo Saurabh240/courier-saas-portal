@@ -19,9 +19,28 @@ public class Order {
     private String pickupAddress;
     private String deliveryAddress;
 
+    private String packageType;
+
+    private  Integer packageWeightKg;
+    private  Integer packageLengthCm;
+    private  Integer  packageWidthCm;
+    private  Integer  packageHeightCm;
+
+    private String  pickupPhone;
+    private String deliveryPhone;
+
+    private String    pickupDate;
+    private String pickupTimeWindow;
+    private String  specialInstructions;
+
+    private String paymentMode;
+
+    private Boolean isFragile ;
+    private String  deliveryType;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
-
+    private Double declaredValue;
     private String assignedPartnerEmail;
 
     private LocalDateTime createdAt;
@@ -34,5 +53,12 @@ public class Order {
         this.status = OrderStatus.CREATED;
     }
 
+    public Boolean getIsFragile() {
+        return isFragile;
+    }
+
+    public void setIsFragile(Boolean isFragile) {
+        this.isFragile = isFragile;
+    }
     // Getters and Setters
 }

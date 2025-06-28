@@ -31,6 +31,20 @@ public class OrderService {
     public OrderResponse createOrder(OrderRequest request) {
         Order order = new Order();
         order.setCustomerEmail(request.customerEmail());
+        order.setPackageType(request.packageType());
+        order.setPackageWeightKg(request.packageWeightKg());
+        order.setPackageLengthCm(request.packageLengthCm());
+        order.setPackageHeightCm(request.packageHeightCm());
+        order.setPackageWidthCm(request.packageWidthCm());
+        order.setDeliveryPhone(request.deliveryPhone());
+        order.setPickupPhone(request.pickupPhone());
+        order.setPickupDate(request.pickupDate());
+        order.setPickupTimeWindow(request.pickupTimeWindow());
+        order.setSpecialInstructions(request.specialInstructions());
+        order.setPaymentMode(request.paymentMode());
+        order.setDeclaredValue(request.declaredValue());
+        order.setIsFragile(request.isFragile());
+        order.setDeliveryType(request.deliveryType());
         order.setSenderName(request.senderName());
         order.setReceiverName(request.receiverName());
         order.setPickupAddress(request.pickupAddress());
@@ -78,6 +92,28 @@ public class OrderService {
     }
 
     private OrderResponse toResponse(Order order) {
-        return new OrderResponse(order.getId(), order.getCustomerEmail(), order.getSenderName(), order.getReceiverName(), order.getPickupAddress(), order.getDeliveryAddress(), order.getStatus(), order.getAssignedPartnerEmail(), order.getCreatedAt(), order.getDeliveryProofPath());
+        return new OrderResponse(
+                order.getId(),
+                order.getCustomerEmail(),
+                order.getSenderName(),
+                order.getReceiverName(),
+                order.getPickupAddress(),
+                order.getDeliveryAddress(),
+                order.getStatus(),
+                order.getAssignedPartnerEmail(),
+                order.getCreatedAt(),
+                order.getDeliveryProofPath(),
+                order.getPickupPhone(),
+                order.getPackageLengthCm() != null ? order.getPackageLengthCm() : 0,
+                order.getPackageWidthCm() != null ? order.getPackageWidthCm() : 0,
+                order.getPackageHeightCm() != null ? order.getPackageHeightCm() : 0,
+                order.getPackageWeightKg() != null ? order.getPackageWeightKg() : 0,
+                order.getPaymentMode(),
+                order.getDeliveryPhone(),
+                order.getDeclaredValue(),
+                order.getDeliveryType()
+        );
     }
-}
+
+
+    }
