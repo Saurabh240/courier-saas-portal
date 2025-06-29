@@ -31,6 +31,10 @@ public class OrderService {
     public OrderResponse createOrder(OrderRequest request) {
         Order order = new Order();
         order.setCustomerEmail(request.customerEmail());
+        order.setSenderName(request.senderName());
+        order.setReceiverName(request.receiverName());
+        order.setPickupAddress(request.pickupAddress());
+        order.setDeliveryAddress(request.deliveryAddress());
         order.setPackageType(request.packageType());
         order.setPackageWeightKg(request.packageWeightKg());
         order.setPackageLengthCm(request.packageLengthCm());
@@ -45,10 +49,7 @@ public class OrderService {
         order.setDeclaredValue(request.declaredValue());
         order.setIsFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
-        order.setSenderName(request.senderName());
-        order.setReceiverName(request.receiverName());
-        order.setPickupAddress(request.pickupAddress());
-        order.setDeliveryAddress(request.deliveryAddress());
+
         return toResponse(repository.save(order));
     }
 
@@ -102,18 +103,18 @@ public class OrderService {
                 order.getStatus(),
                 order.getAssignedPartnerEmail(),
                 order.getCreatedAt(),
-                order.getDeliveryProofPath(),
-                order.getPickupPhone(),
+                order.getPackageType(),
+                order.getPackageWeightKg() != null ? order.getPackageWeightKg() : 0.0,
+                order.getPackageHeightCm() != null ? order.getPackageHeightCm() : 0,
                 order.getPackageLengthCm() != null ? order.getPackageLengthCm() : 0,
                 order.getPackageWidthCm() != null ? order.getPackageWidthCm() : 0,
-                order.getPackageHeightCm() != null ? order.getPackageHeightCm() : 0,
-                order.getPackageWeightKg() != null ? order.getPackageWeightKg() : 0,
-                order.getPaymentMode(),
+                order.getPickupPhone(),
                 order.getDeliveryPhone(),
-                order.getDeclaredValue(),
-                order.getDeliveryType()
+                order.getDeclaredValue() != null ? Double.parseDouble(String.format("%.1f", order.getDeclaredValue())) : 0.0,
+                order.getIsFragile() != null ? order.getIsFragile() : false,
+                order.getDeliveryProofPath()
         );
-    }
+     }
 
 
     }

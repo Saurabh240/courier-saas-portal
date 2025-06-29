@@ -1,5 +1,6 @@
 package com.courier.app.orders.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,34 +19,39 @@ public class Order {
     private String receiverName;
     private String pickupAddress;
     private String deliveryAddress;
-
-    private String packageType;
-
-    private  Integer packageWeightKg;
+    private LocalDateTime createdAt;
+    private String deliveryProofPath;
+    private String  pickupPhone;
     private  Integer packageLengthCm;
     private  Integer  packageWidthCm;
     private  Integer  packageHeightCm;
-
-    private String  pickupPhone;
+    private  Double packageWeightKg;
+    private String packageType;
+    private String paymentMode;
     private String deliveryPhone;
+
+
+
+
 
     private String    pickupDate;
     private String pickupTimeWindow;
     private String  specialInstructions;
+    private String  deliveryType;
 
-    private String paymentMode;
 
     private Boolean isFragile ;
-    private String  deliveryType;
+
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#0.0")
     private Double declaredValue;
     private String assignedPartnerEmail;
 
-    private LocalDateTime createdAt;
 
-    private String deliveryProofPath;
+
+
 
     @PrePersist
     public void onCreate() {
