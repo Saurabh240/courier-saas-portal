@@ -113,6 +113,7 @@ public class OrderService {
                 order.getDeclaredValue() != null ? Double.parseDouble(String.format("%.1f", order.getDeclaredValue())) : 0.0,
                 order.getIsFragile() != null ? order.getIsFragile() : false,
                 order.getDeliveryProofPath()
+
         );
      }
 
