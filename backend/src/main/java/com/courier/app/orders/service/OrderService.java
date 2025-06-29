@@ -8,6 +8,9 @@ import com.courier.app.orders.model.OrderStatus;
 import com.courier.app.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -53,9 +57,16 @@ public class OrderService {
         return toResponse(repository.save(order));
     }
 
-    public List<OrderResponse> getAllOrders() {
-        return repository.findAll().stream().map(this::toResponse).toList();
+    public List<OrderResponse> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size); // Spring pages are 0-indexed
+        Page<Order> pagedOrders = repository.findAll(pageable);
+        return pagedOrders
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
+
+
 
     public List<OrderResponse> getOrdersForCustomer(String email) {
         return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
