@@ -32,7 +32,8 @@ public class OrderController {
     public List<OrderResponse> all(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "25") int size
-    ) {
+    )
+    {
         return service.getAllOrders(page, size);
     }
 
