@@ -29,9 +29,14 @@ public class OrderController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
-    public List<OrderResponse> all() {
-        return service.getAllOrders();
+    public List<OrderResponse> all(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "25") int size
+    )
+    {
+        return service.getAllOrders(page, size);
     }
+
 
     @GetMapping("/customer")
     @PreAuthorize("hasRole('CUSTOMER')")
