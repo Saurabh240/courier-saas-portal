@@ -20,13 +20,11 @@ public class OrderController {
 
     @Autowired
     private OrderService service;
-
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')")
     public OrderResponse create(@RequestBody OrderRequest request) {
         return service.createOrder(request);
     }
-
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public List<OrderResponse> all(
@@ -36,7 +34,6 @@ public class OrderController {
     {
         return service.getAllOrders(page, size);
     }
-
 
     @GetMapping("/customer")
     @PreAuthorize("hasRole('CUSTOMER')")
