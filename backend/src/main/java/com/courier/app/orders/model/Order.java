@@ -26,9 +26,9 @@ public class Order {
     private  Integer  packageWidthCm;
     private  Integer  packageHeightCm;
     private  Double packageWeightKg;
-    private String packageType;
-    private String paymentMode;
     private String deliveryPhone;
+
+
 
 
 
@@ -37,7 +37,7 @@ public class Order {
     private String    pickupDate;
     private String pickupTimeWindow;
     private String  specialInstructions;
-    private String  deliveryType;
+
 
 
     private Boolean isFragile ;
@@ -58,6 +58,11 @@ public class Order {
         this.createdAt = LocalDateTime.now();
         this.status = OrderStatus.CREATED;
     }
+
+    @Enumerated(EnumType.STRING)
+    private PackageType packageType;
+    private PaymentMode paymentMode;
+    private  DeliveryType  deliveryType;
 
     public Boolean getIsFragile() {
         return isFragile;
