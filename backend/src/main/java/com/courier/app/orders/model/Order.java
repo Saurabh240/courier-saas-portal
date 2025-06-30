@@ -23,9 +23,9 @@ public class Order {
     private LocalDateTime createdAt;
     private String deliveryProofPath;
     private String  pickupPhone;
-    private  Integer packageLengthCm;
-    private  Integer  packageWidthCm;
-    private  Integer  packageHeightCm;
+    private  Double packageLengthCm;
+    private  Double  packageWidthCm;
+    private  Double  packageHeightCm;
     private  Double packageWeightKg;
     private String deliveryPhone;
     private String    pickupDate;
