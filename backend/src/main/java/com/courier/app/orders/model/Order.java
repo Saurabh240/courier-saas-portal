@@ -3,17 +3,18 @@ package com.courier.app.orders.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
 @Data
+@Setter
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String customerEmail;
     private String senderName;
     private String receiverName;
@@ -26,29 +27,23 @@ public class Order {
     private  Integer  packageWidthCm;
     private  Integer  packageHeightCm;
     private  Double packageWeightKg;
-    private String packageType;
-    private String paymentMode;
     private String deliveryPhone;
-
-
-
-
-
     private String    pickupDate;
     private String pickupTimeWindow;
     private String  specialInstructions;
-    private String  deliveryType;
-
-
     private Boolean isFragile ;
-
-
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#0.0")
     private Double declaredValue;
     private String assignedPartnerEmail;
 
+    @Enumerated(EnumType.STRING)
+    private PackageType packageType;
+    @Enumerated(EnumType.STRING)
+    private PaymentMode paymentMode;
+    @Enumerated(EnumType.STRING)
+    private  DeliveryType  deliveryType;
 
 
 
@@ -59,12 +54,6 @@ public class Order {
         this.status = OrderStatus.CREATED;
     }
 
-    public Boolean getIsFragile() {
-        return isFragile;
-    }
 
-    public void setIsFragile(Boolean isFragile) {
-        this.isFragile = isFragile;
-    }
-    // Getters and Setters
+
 }
