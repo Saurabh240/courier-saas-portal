@@ -3,7 +3,6 @@ package com.courier.app.orders.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
