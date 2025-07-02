@@ -1,6 +1,5 @@
 package com.courier.app.orders.service;
 
-
 import com.courier.app.orders.model.Order;
 import com.courier.app.orders.model.OrderRequest;
 import com.courier.app.orders.model.OrderResponse;
@@ -67,7 +66,6 @@ public class OrderService {
     }
 
 
-
     public List<OrderResponse> getOrdersForCustomer(String email) {
         return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
     }
@@ -126,7 +124,7 @@ public class OrderService {
                 order.getDeliveryProofPath()
 
         );
-     }
-
-
     }
+
+
+}

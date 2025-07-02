@@ -1,9 +1,7 @@
 package com.courier.app.orders.model;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,7 +33,6 @@ public class Order {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#0.0")
     private Double declaredValue;
     private String assignedPartnerEmail;
-
     @Enumerated(EnumType.STRING)
     private PackageType packageType;
     @Enumerated(EnumType.STRING)
@@ -43,15 +40,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private  DeliveryType  deliveryType;
 
-
-
-
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.status = OrderStatus.CREATED;
     }
-
-
-
 }
