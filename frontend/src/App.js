@@ -8,6 +8,8 @@ import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import LoginPage from './pages/LoginPage';
 import { useAuth } from './context/AuthContext';
+import PendingOrdersPage from "./pages/admin/PendingOrdersPage";
+import DeliveredOrdersPage from "./pages/admin/DeliveredOrdersPage";
 
 // Protect routes based on role
 function PrivateRoute({ children, role }) {
@@ -52,6 +54,8 @@ function App() {
 
       {/* Private routes */}
       <Route path="/admin" element={<PrivateRoute role="ADMIN"><AdminDashboard /></PrivateRoute>} />
+      <Route path="/admin/orders/pending" element={<PendingOrdersPage />} />
+      <Route path="/admin/orders/delivered" element={<DeliveredOrdersPage />} />  
       <Route path="/staff" element={<PrivateRoute role="STAFF"><StaffDashboard /></PrivateRoute>} />
       <Route path="/partner" element={<PrivateRoute role="DELIVERY_PARTNER"><PartnerDashboard /></PrivateRoute>} />
       <Route path="/customer" element={<PrivateRoute role="CUSTOMER"><CustomerDashboard /></PrivateRoute>} />
