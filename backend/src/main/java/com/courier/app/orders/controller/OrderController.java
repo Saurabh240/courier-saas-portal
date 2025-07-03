@@ -66,4 +66,11 @@ public class OrderController {
         OrderResponse updated = service.uploadProof(id, file);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER', 'DELIVERY_PARTNER')")
+    public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
+        OrderResponse order = service.getOrderById(id);
+        return new ResponseEntity<>(order, HttpStatus.OK);
+    }
 }

@@ -101,6 +101,12 @@ public class OrderService {
         return toResponse(repository.save(order));
     }
 
+    public OrderResponse getOrderById(Long id) {
+        Order order = repository.findById(id).orElseThrow();
+        return toResponse(order);
+    }
+
+
     private OrderResponse toResponse(Order order) {
         return new OrderResponse(
                 order.getId(),
