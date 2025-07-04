@@ -1,0 +1,28 @@
+
+CREATE TABLE public.orders (
+	id bigserial NOT NULL,
+	assigned_partner_email varchar(255) NULL,
+	created_at timestamp(6) NULL,
+	customer_email varchar(255) NULL,
+	delivery_address varchar(255) NULL,
+	delivery_proof_path varchar(255) NULL,
+	pickup_address varchar(255) NULL,
+	receiver_name varchar(255) NULL,
+	sender_name varchar(255) NULL,
+	status varchar(255) NULL,
+	delivery_phone varchar(255) NULL,
+	delivery_type varchar(255) NULL,
+	package_type varchar(255) NULL,
+	payment_mode varchar(255) NULL,
+	pickup_date varchar(255) NULL,
+	pickup_phone varchar(255) NULL,
+	pickup_time_window varchar(255) NULL,
+	special_instructions varchar(255) NULL,
+	declared_value float8 NULL,
+	is_fragile bool NULL,
+	package_height_cm int4 NULL,
+	package_width_cm int4 DEFAULT 0 NULL,
+	package_length_cm int4 NULL,
+	package_weight_kg float8 NULL,
+
+);
