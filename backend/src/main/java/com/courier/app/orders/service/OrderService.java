@@ -1,9 +1,6 @@
 package com.courier.app.orders.service;
 
-import com.courier.app.orders.model.Order;
-import com.courier.app.orders.model.OrderRequest;
-import com.courier.app.orders.model.OrderResponse;
-import com.courier.app.orders.model.OrderStatus;
+import com.courier.app.orders.model.*;
 import com.courier.app.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -105,6 +102,18 @@ public class OrderService {
         Order order = repository.findById(id).orElseThrow();
         return toResponse(order);
     }
+
+    public OrderDetailsResponse getOrderDetailsById(Long id) {
+        Order order = repository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+        return new OrderDetailsResponse(
+                order.getId(),
+                order.getSenderName(),
+                order.getReceiverName(),
+                order.getStatus().toString(),
+                order.getAssignedPartnerEmail()
+        );
+    }
+
 
 
     private OrderResponse toResponse(Order order) {
