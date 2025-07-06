@@ -1,5 +1,4 @@
 package com.courier.app.orders.model;
-
 import java.time.LocalDateTime;
 
 public record OrderDetailsResponse(
@@ -28,4 +27,5 @@ public record OrderDetailsResponse(
         String assignedPartnerEmail,
         LocalDateTime createdAt,
         String deliveryProofPath
-) {}
+) {
+}

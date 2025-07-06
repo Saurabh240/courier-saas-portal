@@ -5,5 +5,5 @@ public record OrderRequest(String customerEmail, String senderName, String recei
                            double packageLengthCm, double packageWidthCm, double packageHeightCm,
                            String pickupPhone, String deliveryPhone, String pickupDate, String pickupTimeWindow,
                            String specialInstructions, PaymentMode paymentMode, double declaredValue, Boolean isFragile,
-                           DeliveryType deliveryType) {
+                           DeliveryType deliveryType , InvoiceStatus invoiceStatus) {
 }

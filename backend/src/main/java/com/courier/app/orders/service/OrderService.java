@@ -1,5 +1,4 @@
 package com.courier.app.orders.service;
-
 import com.courier.app.orders.model.*;
 import com.courier.app.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +27,7 @@ public class OrderService {
     @Value("${upload.dir:uploads}")
     private String uploadDir;
 
-    public OrderResponse createOrder(OrderRequest request) {
+    public OrderDetailsResponse createOrder(OrderRequest request) {
         Order order = new Order();
         order.setCustomerEmail(request.customerEmail());
         order.setSenderName(request.senderName());
@@ -50,8 +48,8 @@ public class OrderService {
         order.setDeclaredValue(request.declaredValue());
         order.setIsFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
-
-        return toResponse(repository.save(order));
+        order.setInvoiceStatus(request.invoiceStatus());
+        return toDetailsResponse(repository.save(order));
     }
 
     public List<OrderResponse> getAllOrders(int page, int size) {
@@ -62,7 +60,6 @@ public class OrderService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
-
 
     public List<OrderResponse> getOrdersForCustomer(String email) {
         return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
@@ -98,6 +95,37 @@ public class OrderService {
         order.setStatus(OrderStatus.DELIVERED);
         return toResponse(repository.save(order));
     }
+
+    private OrderDetailsResponse toDetailsResponse(Order order) {
+        return new OrderDetailsResponse(
+                order.getId(),
+                order.getCustomerEmail(),
+                order.getSenderName(),
+                order.getReceiverName(),
+                order.getPickupAddress(),
+                order.getDeliveryAddress(),
+                order.getPackageType(),
+                order.getPackageWeightKg(),
+                order.getPackageLengthCm(),
+                order.getPackageWidthCm(),
+                order.getPackageHeightCm(),
+                order.getPickupPhone(),
+                order.getDeliveryPhone(),
+                order.getPickupDate(),
+                order.getPickupTimeWindow(),
+                order.getSpecialInstructions(),
+                order.getPaymentMode(),
+                order.getDeclaredValue(),
+                order.getIsFragile(),
+                order.getStatus(),
+                order.getDeliveryType(),
+                order.getInvoiceStatus(),
+                order.getAssignedPartnerEmail(),
+                order.getCreatedAt(),
+                order.getDeliveryProofPath()
+        );
+    }
+
 
     private OrderResponse toResponse(Order order) {
         return new OrderResponse(

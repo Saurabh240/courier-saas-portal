@@ -24,7 +24,7 @@ public class OrderController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')")
-    public OrderResponse create(@RequestBody OrderRequest request) {
+    public OrderDetailsResponse create(@RequestBody OrderRequest request) {
         return service.createOrder(request);
     }
 
