@@ -40,6 +40,8 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private  DeliveryType  deliveryType;
 
+    private String invoiceStatus;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();

@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import com.courier.app.orders.model.OrderRequest;
 
 @Service
 public class OrderService {
@@ -98,48 +99,55 @@ public class OrderService {
         return toResponse(repository.save(order));
     }
 
-    public OrderResponse getOrderById(Long id) {
-        Order order = repository.findById(id).orElseThrow();
-        return toResponse(order);
-    }
-
-    public OrderDetailsResponse getOrderDetailsById(Long id) {
-        Order order = repository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
-        return new OrderDetailsResponse(
+    private OrderResponse toResponse(Order order) {
+        return new OrderResponse(
                 order.getId(),
                 order.getSenderName(),
                 order.getReceiverName(),
-                order.getStatus().toString(),
-                order.getAssignedPartnerEmail()
+                order.getPickupAddress(),
+                order.getDeliveryAddress(),
+                order.getPaymentMode(),
+                order.getDeclaredValue() != null ? order.getDeclaredValue() : 0.0,
+                order.getDeliveryType(),
+                order.getStatus(),
+                order.getInvoiceStatus()
         );
     }
 
 
 
-    private OrderResponse toResponse(Order order) {
-        return new OrderResponse(
+    public OrderDetailsResponse getOrderById(Long id) {
+        Order order = repository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+        return new OrderDetailsResponse(
                 order.getId(),
                 order.getCustomerEmail(),
                 order.getSenderName(),
                 order.getReceiverName(),
                 order.getPickupAddress(),
                 order.getDeliveryAddress(),
+                order.getPackageType(),
+                order.getPackageWeightKg(),
+                order.getPackageLengthCm(),
+                order.getPackageHeightCm(),
+                order.getPackageWidthCm(),
+                order.getDeliveryPhone(),
+                order.getPickupPhone(),
+                order.getPickupDate(),
+                order.getPickupTimeWindow(),
+                order.getSpecialInstructions(),
+                order.getPaymentMode(),
+                order.getDeclaredValue() != null ? order.getDeclaredValue() : 0.0,
+                order.getIsFragile() != null ? order.getIsFragile() : false,
                 order.getStatus(),
+                order.getDeliveryType(),
+                order.getInvoiceStatus(),
                 order.getAssignedPartnerEmail(),
                 order.getCreatedAt(),
-                order.getPackageType(),
-                order.getPackageWeightKg() != null ? order.getPackageWeightKg() : 0.0,
-                order.getPackageHeightCm() != null ? order.getPackageHeightCm() : 0.0,
-                order.getPackageLengthCm() != null ? order.getPackageLengthCm() : 0.0,
-                order.getPackageWidthCm() != null ? order.getPackageWidthCm() : 0.0,
-                order.getPickupPhone(),
-                order.getDeliveryPhone(),
-                order.getDeclaredValue() != null ? Double.parseDouble(String.format("%.1f", order.getDeclaredValue())) : 0.0,
-                order.getIsFragile() != null ? order.getIsFragile() : false,
                 order.getDeliveryProofPath()
-
         );
     }
+
+
 
 
 }

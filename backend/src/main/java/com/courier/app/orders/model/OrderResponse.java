@@ -1,11 +1,14 @@
 package com.courier.app.orders.model;
 
-import java.time.LocalDateTime;
-
-public record OrderResponse(Long id, String customerEmail, String senderName, String receiverName, String pickupAddress,
-                            String deliveryAddress, OrderStatus status, String assignedPartnerEmail,
-                            LocalDateTime createdAt,
-                            PackageType packageType, double packageWeightKg, double packageHeightCm,
-                            double packageLengthCm, double packageWidthCm, String pickupPhone, String deliveryPhone,
-                            double declaredValue, boolean isFragile, String deliveryProofPath) {
-}
+public record OrderResponse(
+        Long orderId,
+        String senderName,
+        String receiverName,
+        String pickupAddress,
+        String deliveryAddress,
+        PaymentMode paymentMode,
+        double declaredValue,
+        DeliveryType deliveryType,
+        OrderStatus status,
+        String invoiceStatus
+) {}

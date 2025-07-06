@@ -70,16 +70,12 @@ public class OrderController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DELIVERY_PARTNER')")
-    public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
-        OrderResponse order = service.getOrderById(id);
-        return new ResponseEntity<>(order, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}/details")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DELIVERY_PARTNER')")
-    public ResponseEntity<OrderDetailsResponse> getOrderDetails(@PathVariable Long id) {
-        OrderDetailsResponse response = service.getOrderDetailsById(id);
+    public ResponseEntity<OrderDetailsResponse> getOrderById(@PathVariable Long id) {
+        OrderDetailsResponse response = service.getOrderById(id);
         return ResponseEntity.ok(response);
     }
+
+
+
 
 }

@@ -1,37 +1,31 @@
 package com.courier.app.orders.model;
 
-public class OrderDetailsResponse {
-    private Long id;
-    private String senderName;
-    private String receiverName;
-    private String status;
-    private String assignedPartnerEmail;
+import java.time.LocalDateTime;
 
-    public OrderDetailsResponse(Long id, String senderName, String receiverName, String status, String assignedPartnerEmail) {
-        this.id = id;
-        this.senderName = senderName;
-        this.receiverName = receiverName;
-        this.status = status;
-        this.assignedPartnerEmail = assignedPartnerEmail;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public String getReceiverName() {
-        return receiverName;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getAssignedPartnerEmail() {
-        return assignedPartnerEmail;
-    }
-}
+public record OrderDetailsResponse(
+        Long id,
+        String customerEmail,
+        String senderName,
+        String receiverName,
+        String pickupAddress,
+        String deliveryAddress,
+        PackageType packageType,
+        double packageWeightKg,
+        double packageLengthCm,
+        double packageWidthCm,
+        double packageHeightCm,
+        String pickupPhone,
+        String deliveryPhone,
+        String pickupDate,
+        String pickupTimeWindow,
+        String specialInstructions,
+        PaymentMode paymentMode,
+        double declaredValue,
+        boolean isFragile,
+        OrderStatus status,
+        DeliveryType deliveryType,
+        String invoiceStatus,
+        String assignedPartnerEmail,
+        LocalDateTime createdAt,
+        String deliveryProofPath
+) {}
