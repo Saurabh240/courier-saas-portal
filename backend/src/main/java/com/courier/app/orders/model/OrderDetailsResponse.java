@@ -24,7 +24,7 @@ public record OrderDetailsResponse(
         boolean isFragile,
         OrderStatus status,
         DeliveryType deliveryType,
-        String invoiceStatus,
+        InvoiceStatus invoiceStatus,
         String assignedPartnerEmail,
         LocalDateTime createdAt,
         String deliveryProofPath

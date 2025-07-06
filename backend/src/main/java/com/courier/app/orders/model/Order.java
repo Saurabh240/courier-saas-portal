@@ -31,7 +31,7 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#0.0")
-    private Double declaredValue;
+    private double declaredValue;
     private String assignedPartnerEmail;
     @Enumerated(EnumType.STRING)
     private PackageType packageType;
@@ -39,8 +39,8 @@ public class Order {
     private PaymentMode paymentMode;
     @Enumerated(EnumType.STRING)
     private  DeliveryType  deliveryType;
-
-    private String invoiceStatus;
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus invoiceStatus;
 
     @PrePersist
     public void onCreate() {

@@ -10,5 +10,5 @@ public record OrderResponse(
         double declaredValue,
         DeliveryType deliveryType,
         OrderStatus status,
-        String invoiceStatus
+        InvoiceStatus invoiceStatus
 ) {}

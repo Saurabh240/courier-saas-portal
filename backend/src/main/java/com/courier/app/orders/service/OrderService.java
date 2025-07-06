@@ -107,14 +107,12 @@ public class OrderService {
                 order.getPickupAddress(),
                 order.getDeliveryAddress(),
                 order.getPaymentMode(),
-                order.getDeclaredValue() != null ? order.getDeclaredValue() : 0.0,
+                order.getDeclaredValue(),
                 order.getDeliveryType(),
                 order.getStatus(),
                 order.getInvoiceStatus()
         );
     }
-
-
 
     public OrderDetailsResponse getOrderById(Long id) {
         Order order = repository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
@@ -136,8 +134,8 @@ public class OrderService {
                 order.getPickupTimeWindow(),
                 order.getSpecialInstructions(),
                 order.getPaymentMode(),
-                order.getDeclaredValue() != null ? order.getDeclaredValue() : 0.0,
-                order.getIsFragile() != null ? order.getIsFragile() : false,
+                order.getDeclaredValue(),
+                order.getIsFragile(),
                 order.getStatus(),
                 order.getDeliveryType(),
                 order.getInvoiceStatus(),
@@ -146,8 +144,5 @@ public class OrderService {
                 order.getDeliveryProofPath()
         );
     }
-
-
-
 
 }
