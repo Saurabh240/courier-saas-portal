@@ -48,7 +48,6 @@ public class OrderService {
         order.setDeclaredValue(request.declaredValue());
         order.setIsFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
-        order.setInvoiceStatus(request.invoiceStatus());
         return toDetailsResponse(repository.save(order));
     }
 
