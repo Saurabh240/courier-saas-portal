@@ -46,7 +46,7 @@ public class OrderService {
         order.setSpecialInstructions(request.specialInstructions());
         order.setPaymentMode(request.paymentMode());
         order.setDeclaredValue(request.declaredValue());
-        order.setIsFragile(request.isFragile());
+        order.setFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
         return toDetailsResponse(repository.save(order));
     }
@@ -115,7 +115,7 @@ public class OrderService {
                 order.getSpecialInstructions(),
                 order.getPaymentMode(),
                 order.getDeclaredValue(),
-                order.getIsFragile(),
+                order.isFragile(),
                 order.getStatus(),
                 order.getDeliveryType(),
                 order.getInvoiceStatus(),
@@ -162,7 +162,7 @@ public class OrderService {
                 order.getSpecialInstructions(),
                 order.getPaymentMode(),
                 order.getDeclaredValue(),
-                order.getIsFragile(),
+                order.isFragile(),
                 order.getStatus(),
                 order.getDeliveryType(),
                 order.getInvoiceStatus(),
