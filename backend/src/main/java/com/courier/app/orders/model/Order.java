@@ -18,16 +18,16 @@ public class Order {
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private String deliveryProofPath;
-    private String  pickupPhone;
-    private  Double packageLengthCm;
-    private  Double  packageWidthCm;
-    private  Double  packageHeightCm;
-    private  Double packageWeightKg;
+    private String pickupPhone;
+    private Double packageLengthCm;
+    private Double packageWidthCm;
+    private Double packageHeightCm;
+    private Double packageWeightKg;
     private String deliveryPhone;
-    private String    pickupDate;
+    private String pickupDate;
     private String pickupTimeWindow;
-    private String  specialInstructions;
-    private Boolean isFragile ;
+    private String specialInstructions;
+    private Boolean isFragile;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "#0.0")
@@ -38,7 +38,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private PaymentMode paymentMode;
     @Enumerated(EnumType.STRING)
-    private  DeliveryType  deliveryType;
+    private DeliveryType deliveryType;
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus invoiceStatus;
 
     @PrePersist
     public void onCreate() {

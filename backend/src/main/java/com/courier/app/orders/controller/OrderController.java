@@ -1,5 +1,6 @@
 package com.courier.app.orders.controller;
 
+import com.courier.app.orders.model.OrderDetailsResponse;
 import com.courier.app.orders.model.OrderRequest;
 import com.courier.app.orders.model.OrderResponse;
 import com.courier.app.orders.model.OrderStatus;
@@ -23,7 +24,7 @@ public class OrderController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')")
-    public OrderResponse create(@RequestBody OrderRequest request) {
+    public OrderDetailsResponse create(@RequestBody OrderRequest request) {
         return service.createOrder(request);
     }
 
@@ -66,4 +67,15 @@ public class OrderController {
         OrderResponse updated = service.uploadProof(id, file);
         return new ResponseEntity<>(updated, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DELIVERY_PARTNER')")
+    public ResponseEntity<OrderDetailsResponse> getOrderById(@PathVariable Long id) {
+        OrderDetailsResponse response = service.getOrderById(id);
+        return ResponseEntity.ok(response);
+    }
+
+
+
+
 }
