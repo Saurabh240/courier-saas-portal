@@ -46,7 +46,7 @@ public class DashboardService {
         }
         return new DashboardSummary(total, delivered, inTransit, createdToday, statusCountMap);
     }
-    public List<OrderDetailsResponse> getOrdersBetween(LocalDate start, LocalDate end) {
+    public List<OrderDetailsResponse> findByCreatedAtBetween(LocalDate start, LocalDate end) {
         List<Order> orders = orderRepository.findAll().stream()
                 .filter(o -> !o.getCreatedAt().isBefore(start.atStartOfDay()) &&
                         o.getCreatedAt().isBefore(end.plusDays(1).atStartOfDay()))

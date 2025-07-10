@@ -30,7 +30,7 @@ public class DashboardController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
     ) {
-        return service.getOrdersBetween(start, end);
+        return service.findByCreatedAtBetween(start, end);
     }
     @GetMapping("/export")
     @PreAuthorize("hasRole('ADMIN')")
