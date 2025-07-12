@@ -1,4 +1,5 @@
 package com.courier.app.dashboard.model;
+
 import com.courier.app.orders.model.OrderStatus;
 import java.util.Map;
 

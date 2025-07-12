@@ -1,11 +1,12 @@
 package com.courier.app.dashboard.service;
+
+import com.courier.app.orders.model.OrderResponse;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
 import com.courier.app.dashboard.model.DashboardSummary;
 import com.courier.app.orders.model.Order;
-import com.courier.app.orders.model.OrderDetailsResponse;
 import com.courier.app.orders.model.OrderStatus;
 import com.courier.app.orders.repository.OrderRepository;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,40 +47,35 @@ public class DashboardService {
         }
         return new DashboardSummary(total, delivered, inTransit, createdToday, statusCountMap);
     }
-    public List<OrderDetailsResponse> findByCreatedAtBetween(LocalDate start, LocalDate end) {
+
+    public List<OrderResponse> CreatedAtBetween(LocalDate start, LocalDate end) {
+        if (start == null || end == null) {
+            end = LocalDate.now();
+            start = end.minusDays(30);
+        }
+        LocalDateTime startDateTime = start.atStartOfDay();
+        LocalDateTime endDateTime = end.plusDays(1).atStartOfDay();
+
         List<Order> orders = orderRepository.findAll().stream()
-                .filter(o -> !o.getCreatedAt().isBefore(start.atStartOfDay()) &&
-                        o.getCreatedAt().isBefore(end.plusDays(1).atStartOfDay()))
+                .filter(o -> !o.getCreatedAt().isBefore(startDateTime) &&
+                        o.getCreatedAt().isBefore(endDateTime))
                 .collect(Collectors.toList());
 
-        return orders.stream().map(order -> new OrderDetailsResponse(
+        return orders.stream().map(order -> new OrderResponse(
                 order.getId(),
-                order.getCustomerEmail(),
                 order.getSenderName(),
                 order.getReceiverName(),
                 order.getPickupAddress(),
                 order.getDeliveryAddress(),
-                order.getPackageType(),
-                order.getPackageWeightKg(),
-                order.getPackageLengthCm(),
-                order.getPackageWidthCm(),
-                order.getPackageHeightCm(),
-                order.getPickupPhone(),
-                order.getDeliveryPhone(),
-                order.getPickupDate(),
-                order.getPickupTimeWindow(),
-                order.getSpecialInstructions(),
                 order.getPaymentMode(),
                 order.getDeclaredValue(),
-                order.isFragile(),
-                order.getStatus(),
                 order.getDeliveryType(),
-                order.getInvoiceStatus(),
-                order.getAssignedPartnerEmail(),
-                order.getCreatedAt(),
-                order.getDeliveryProofPath()
+                order.getStatus(),
+                order.getInvoiceStatus()
+
         )).collect(Collectors.toList());
     }
+
     public void exportToExcel(HttpServletResponse response) throws IOException {
         List<Order> orders = orderRepository.findAll();
         Workbook workbook = new XSSFWorkbook();

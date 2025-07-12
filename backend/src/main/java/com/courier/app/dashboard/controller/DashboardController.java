@@ -1,7 +1,8 @@
 package com.courier.app.dashboard.controller;
+
 import com.courier.app.dashboard.model.DashboardSummary;
 import com.courier.app.dashboard.service.DashboardService;
-import com.courier.app.orders.model.OrderDetailsResponse;
+import com.courier.app.orders.model.OrderResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,11 +27,11 @@ public class DashboardController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<OrderDetailsResponse> getOrdersBetween(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
+    public List<OrderResponse> getOrdersBetween(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
     ) {
-        return service.findByCreatedAtBetween(start, end);
+        return service.CreatedAtBetween(start, end);
     }
     @GetMapping("/export")
     @PreAuthorize("hasRole('ADMIN')")
