@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
 
     private final UserRepository repo;
@@ -45,4 +45,8 @@ public class UserController {
     public List<UserResponse> listAll() {
         return service.listUsers();
     }
+
+
+
+
 }
