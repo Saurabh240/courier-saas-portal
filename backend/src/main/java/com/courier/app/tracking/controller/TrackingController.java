@@ -17,23 +17,17 @@ public class TrackingController {
     @Autowired
     private TrackingService trackingService;
 
-    // POST
-    // http://localhost:8080/start
     @PostMapping("/start")
     public ResponseEntity<StartTrackingResponse> startTracking(@RequestBody StartTrackingRequest request) {
         return ResponseEntity.ok(trackingService.startTracking(request));
     }
 
-    // POST
-    // http://localhost:8080/{trackingId}/location
     @PostMapping("/{trackingId}/location")
     public ResponseEntity<UpdateLocationResponse> updateLocation(@PathVariable String trackingId, @RequestBody UpdateLocationRequest request) {
         return ResponseEntity.ok(trackingService.updateLocation(trackingId, request));
     }
 
 
-    // GET
-    // http://localhost:8080/{trackingId}/timeline
     @GetMapping("/{trackingId}/timeline")
     public ResponseEntity<LocationTimelineResponse> getTimeline(@PathVariable String trackingId) {
         return ResponseEntity.ok(trackingService.getTimeline(trackingId));
