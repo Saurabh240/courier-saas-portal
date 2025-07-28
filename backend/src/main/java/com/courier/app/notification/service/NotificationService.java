@@ -1,9 +1,8 @@
 package com.courier.app.notification.service;
 
-import org.springframework.stereotype.Service;
+import com.courier.app.notification.model.NotificationEvent;
 
-@Service
-public class NotificationService {
 
-    // TODO: Business logic goes here
+public interface NotificationService {
+    void processNotification(NotificationEvent event);
 }
