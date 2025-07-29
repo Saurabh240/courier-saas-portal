@@ -1,9 +1,5 @@
 package com.courier.app.orders.service;
-
-import com.courier.app.orders.model.Order;
-import com.courier.app.orders.model.OrderRequest;
-import com.courier.app.orders.model.OrderResponse;
-import com.courier.app.orders.model.OrderStatus;
+import com.courier.app.orders.model.*;
 import com.courier.app.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import com.courier.app.orders.model.OrderRequest;
 
 @Service
 public class OrderService {
@@ -31,7 +27,7 @@ public class OrderService {
     @Value("${upload.dir:uploads}")
     private String uploadDir;
 
-    public OrderResponse createOrder(OrderRequest request) {
+    public OrderDetailsResponse createOrder(OrderRequest request) {
         Order order = new Order();
         order.setCustomerEmail(request.customerEmail());
         order.setSenderName(request.senderName());
@@ -50,10 +46,9 @@ public class OrderService {
         order.setSpecialInstructions(request.specialInstructions());
         order.setPaymentMode(request.paymentMode());
         order.setDeclaredValue(request.declaredValue());
-        order.setIsFragile(request.isFragile());
+        order.setFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
-
-        return toResponse(repository.save(order));
+        return toDetailsResponse(repository.save(order));
     }
 
     public List<OrderResponse> getAllOrders(int page, int size) {
@@ -64,7 +59,6 @@ public class OrderService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
-
 
     public List<OrderResponse> getOrdersForCustomer(String email) {
         return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
@@ -101,30 +95,81 @@ public class OrderService {
         return toResponse(repository.save(order));
     }
 
-    private OrderResponse toResponse(Order order) {
-        return new OrderResponse(
+    private OrderDetailsResponse toDetailsResponse(Order order) {
+        return new OrderDetailsResponse(
                 order.getId(),
                 order.getCustomerEmail(),
                 order.getSenderName(),
                 order.getReceiverName(),
                 order.getPickupAddress(),
                 order.getDeliveryAddress(),
-                order.getStatus(),
-                order.getAssignedPartnerEmail(),
-                order.getCreatedAt(),
                 order.getPackageType(),
-                order.getPackageWeightKg() != null ? order.getPackageWeightKg() : 0.0,
-                order.getPackageHeightCm() != null ? order.getPackageHeightCm() : 0.0,
-                order.getPackageLengthCm() != null ? order.getPackageLengthCm() : 0.0,
-                order.getPackageWidthCm() != null ? order.getPackageWidthCm() : 0.0,
+                order.getPackageWeightKg(),
+                order.getPackageLengthCm(),
+                order.getPackageWidthCm(),
+                order.getPackageHeightCm(),
                 order.getPickupPhone(),
                 order.getDeliveryPhone(),
-                order.getDeclaredValue() != null ? Double.parseDouble(String.format("%.1f", order.getDeclaredValue())) : 0.0,
-                order.getIsFragile() != null ? order.getIsFragile() : false,
+                order.getPickupDate(),
+                order.getPickupTimeWindow(),
+                order.getSpecialInstructions(),
+                order.getPaymentMode(),
+                order.getDeclaredValue(),
+                order.isFragile(),
+                order.getStatus(),
+                order.getDeliveryType(),
+                order.getInvoiceStatus(),
+                order.getAssignedPartnerEmail(),
+                order.getCreatedAt(),
                 order.getDeliveryProofPath()
-
         );
     }
 
+
+    private OrderResponse toResponse(Order order) {
+        return new OrderResponse(
+                order.getId(),
+                order.getSenderName(),
+                order.getReceiverName(),
+                order.getPickupAddress(),
+                order.getDeliveryAddress(),
+                order.getPaymentMode(),
+                order.getDeclaredValue(),
+                order.getDeliveryType(),
+                order.getStatus(),
+                order.getInvoiceStatus()
+        );
+    }
+
+    public OrderDetailsResponse getOrderById(Long id) {
+        Order order = repository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+        return new OrderDetailsResponse(
+                order.getId(),
+                order.getCustomerEmail(),
+                order.getSenderName(),
+                order.getReceiverName(),
+                order.getPickupAddress(),
+                order.getDeliveryAddress(),
+                order.getPackageType(),
+                order.getPackageWeightKg(),
+                order.getPackageLengthCm(),
+                order.getPackageHeightCm(),
+                order.getPackageWidthCm(),
+                order.getDeliveryPhone(),
+                order.getPickupPhone(),
+                order.getPickupDate(),
+                order.getPickupTimeWindow(),
+                order.getSpecialInstructions(),
+                order.getPaymentMode(),
+                order.getDeclaredValue(),
+                order.isFragile(),
+                order.getStatus(),
+                order.getDeliveryType(),
+                order.getInvoiceStatus(),
+                order.getAssignedPartnerEmail(),
+                order.getCreatedAt(),
+                order.getDeliveryProofPath()
+        );
+    }
 
 }
