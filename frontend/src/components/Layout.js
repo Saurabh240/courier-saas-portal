@@ -1,6 +1,5 @@
 import React from "react";
-import SideBar from "./SideBar";
-
+import SideBar from "./Sidebar";
 const Layout = ({ userType, children }) => {
   return (
     <div className="flex min-h-screen bg-white text-black">
