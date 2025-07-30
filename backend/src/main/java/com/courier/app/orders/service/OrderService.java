@@ -94,7 +94,9 @@ public class OrderService {
         order.setStatus(OrderStatus.DELIVERED);
         return toResponse(repository.save(order));
     }
-
+    private double roundTo(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
     private OrderDetailsResponse toDetailsResponse(Order order) {
         return new OrderDetailsResponse(
                 order.getId(),
@@ -104,17 +106,17 @@ public class OrderService {
                 order.getPickupAddress(),
                 order.getDeliveryAddress(),
                 order.getPackageType(),
-                order.getPackageWeightKg(),
-                order.getPackageLengthCm(),
-                order.getPackageWidthCm(),
-                order.getPackageHeightCm(),
+                roundTo(order.getPackageWeightKg()),
+                roundTo(order.getPackageLengthCm()),
+                roundTo(order.getPackageWidthCm()),
+                roundTo(order.getPackageHeightCm()),
                 order.getPickupPhone(),
                 order.getDeliveryPhone(),
                 order.getPickupDate(),
                 order.getPickupTimeWindow(),
                 order.getSpecialInstructions(),
                 order.getPaymentMode(),
-                order.getDeclaredValue(),
+                roundTo(order.getDeclaredValue()),
                 order.isFragile(),
                 order.getStatus(),
                 order.getDeliveryType(),
