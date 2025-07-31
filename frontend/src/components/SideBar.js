@@ -7,6 +7,7 @@ import {
   Settings,
   ChevronDown,
   ChevronUp,
+  PlusSquare
 } from "lucide-react";
 
 const SideBar = ({ userType }) => {
@@ -23,6 +24,7 @@ const SideBar = ({ userType }) => {
   const items = {
     admin: [
       { label: "Dashboard", route: "/admin", icon: <LayoutDashboard size={18} /> },
+      { label: "Create New Order", route: "/admin/orders/new", icon: <PlusSquare size={18} /> },
       {
         label: "Users",
         icon: <Users size={18} />,
@@ -36,7 +38,7 @@ const SideBar = ({ userType }) => {
         icon: <ShoppingCart size={18} />,
         children: [
           { label: "Pending", route: "/admin/orders/pending" },
-          { label: "Completed", route: "/admin/orders/completed" },
+          { label: "Delivered", route: "/admin/orders/delivered" },
         ],
       },
       { label: "Settings", route: "/admin/settings", icon: <Settings size={18} /> },
