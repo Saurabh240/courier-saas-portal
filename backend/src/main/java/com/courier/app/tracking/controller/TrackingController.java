@@ -23,13 +23,13 @@ public class TrackingController {
     }
 
     @PostMapping("/{trackingId}/location")
-    public ResponseEntity<UpdateLocationResponse> updateLocation(@PathVariable String trackingId, @RequestBody UpdateLocationRequest request) {
+    public ResponseEntity<UpdateLocationResponse> updateLocation(@PathVariable Long trackingId, @RequestBody UpdateLocationRequest request) {
         return ResponseEntity.ok(trackingService.updateLocation(trackingId, request));
     }
 
 
     @GetMapping("/{trackingId}/timeline")
-    public ResponseEntity<LocationTimelineResponse> getTimeline(@PathVariable String trackingId) {
+    public ResponseEntity<LocationTimelineResponse> getTimeline(@PathVariable Long trackingId) {
         return ResponseEntity.ok(trackingService.getTimeline(trackingId));
     }
 }

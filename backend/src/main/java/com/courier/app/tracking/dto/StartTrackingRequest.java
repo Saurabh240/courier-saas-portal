@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class StartTrackingRequest {
-    private String orderId;
+    private Long orderId;
     private String pickupTime;
     private String agentId;
 }

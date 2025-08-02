@@ -1,6 +1,7 @@
 package com.courier.app.notification.model;
 
 import com.courier.app.orders.model.OrderStatus;
+import com.courier.app.usermgmt.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,17 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NotificationEvent {
     private Long orderId;
-    private Channel channel;     // EMAIL, SMS
-    private String type;         // ORDER_CREATED or ORDER_STATUS_UPDATED
-    private Customer customer;
-    private OrderStatus status;       //  DELIVERED
+    private Channel channel;
+    private String type;
+    private User user;
+    private OrderStatus status;
 
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Customer {
-        private String email;
-        private String phone;
-    }
+
 }

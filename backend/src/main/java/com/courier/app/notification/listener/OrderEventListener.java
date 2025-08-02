@@ -6,6 +6,7 @@ import com.courier.app.notification.service.NotificationService;
 import com.courier.app.orders.events.OrderCreatedEvent;
 import com.courier.app.orders.events.OrderStatusUpdatedEvent;
 import com.courier.app.orders.model.Order;
+import com.courier.app.usermgmt.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
@@ -34,17 +35,17 @@ public class OrderEventListener {
     }
 
     private void sendNotification(Order order, String type) {
-        NotificationEvent.Customer customer = new NotificationEvent.Customer(
-                order.getCustomerEmail(),
-                order.getDeliveryPhone()
-        );
+        User user = new User();
+                order.getCustomerEmail();
+                order.getDeliveryPhone();
+
 
         if (emailEnabled) {
             NotificationEvent emailEvent = new NotificationEvent(
                     (order.getId()),
                     Channel.EMAIL,
                     type,
-                    customer,
+                    user,
                     order.getStatus()
             );
             notificationService.processNotification(emailEvent);
@@ -55,7 +56,7 @@ public class OrderEventListener {
                     (order.getId()),
                     Channel.SMS,
                     type,
-                    customer,
+                    user,
                     order.getStatus()
             );
             notificationService.processNotification(smsEvent);

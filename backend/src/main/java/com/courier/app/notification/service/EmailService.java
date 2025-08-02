@@ -7,7 +7,6 @@ import com.sendgrid.helpers.mail.objects.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 
 @Service
@@ -16,9 +15,11 @@ public class EmailService {
 
     @Value("${sendgrid.api-key}")
     private String sendGridApiKey;
+    @Value("${notification.email.from}")
+    private String fromEmail;
 
     public boolean sendEmail(String toEmail, String subject, String body) {
-        Email from = new Email("no-reply@courierapp.com");
+        Email from = new Email(fromEmail);
         Email to = new Email(toEmail);
         Content content = new Content("text/plain", body);
         Mail mail = new Mail(from, subject, to, content);

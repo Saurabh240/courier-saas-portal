@@ -13,10 +13,10 @@ public class SmsHelper {
     @Value("${twilio.phone-number}")
     private String twilioPhoneNumber;
 
-    public boolean sendSms(String to, String body) {
+    public boolean sendSms(String toNumber, String body) {
         try {
             Message message = Message.creator(
-                    new PhoneNumber(to),
+                    new PhoneNumber(toNumber),
                     new PhoneNumber(twilioPhoneNumber),
                     body
             ).create();

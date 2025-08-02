@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class LocationTimelineResponse {
-    private String trackingId;
+    private Long trackingId;
     private List<TimeLineEntry> timeline;
 }

@@ -25,18 +25,19 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void processNotification(NotificationEvent event) {
         // EMAIL
-        if (emailEnabled && event.getCustomer().getEmail() != null) {
+        if (emailEnabled && event.getUser().getEmail() != null) {
             String subject = "Your order " + event.getOrderId() + " is now " + event.getStatus();
-            String body = "Dear Customer,\n\nYour order #" + event.getOrderId() +
+            String name = event.getUser().getName() != null ? event.getUser().getName() : "User";
+            String body = "Dear"+name+ ",\n\nYour order #" + event.getOrderId() +
                     " is now " + event.getStatus() + ".\n\nThank you,\nCourier App";
 
             boolean success = false;
             String error = null;
             try {
-                success = emailService.sendEmail(event.getCustomer().getEmail(), subject, body);
+                success = emailService.sendEmail(event.getUser().getEmail(), subject, body);
             } catch (Exception ex) {
                 try {
-                    success = emailService.sendEmail(event.getCustomer().getEmail(), subject, body);
+                    success = emailService.sendEmail(event.getUser().getEmail(), subject, body);
                 } catch (Exception retryEx) {
                     error = retryEx.getMessage();
                 }
@@ -52,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         // SMS
-        if (smsEnabled && event.getChannel() == Channel.SMS && event.getCustomer().getPhone() != null) {
+        if (smsEnabled && event.getChannel() == Channel.SMS && event.getUser().getPhoneNo() != null) {
             String smsBody = "Courier Update: Order #" + event.getOrderId() + " is now " + event.getStatus() + ".";
 
             boolean success = false;
@@ -63,7 +64,7 @@ public class NotificationServiceImpl implements NotificationService {
 
             while (attempts < maxRetries && !success) {
                 try {
-                    smsHelper.sendSms(event.getCustomer().getPhone(), smsBody);
+                    smsHelper.sendSms(event.getUser().getPhoneNo(), smsBody);
                     success = true;
                 } catch (Exception ex) {
                     error = ex.getMessage(); // Capture latest error
