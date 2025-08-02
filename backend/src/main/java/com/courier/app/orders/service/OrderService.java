@@ -1,8 +1,11 @@
 package com.courier.app.orders.service;
+import com.courier.app.orders.events.OrderCreatedEvent;
+import com.courier.app.orders.events.OrderStatusUpdatedEvent;
 import com.courier.app.orders.model.*;
 import com.courier.app.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +26,8 @@ import com.courier.app.orders.model.OrderRequest;
 public class OrderService {
     @Autowired
     private OrderRepository repository;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Value("${upload.dir:uploads}")
     private String uploadDir;
@@ -48,11 +53,15 @@ public class OrderService {
         order.setDeclaredValue(request.declaredValue());
         order.setFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
-        return toDetailsResponse(repository.save(order));
+        Order savedOrder = repository.save(order);
+        eventPublisher.publishEvent(new OrderCreatedEvent(savedOrder));
+
+        return toDetailsResponse(savedOrder);
     }
 
+
     public List<OrderResponse> getAllOrders(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size); // Spring pages are 0-indexed
+        Pageable pageable = PageRequest.of(page - 1, size);
         Page<Order> pagedOrders = repository.findAll(pageable);
         return pagedOrders
                 .stream()
@@ -76,9 +85,13 @@ public class OrderService {
 
     public OrderResponse updateStatus(Long orderId, OrderStatus status) {
         Order order = repository.findById(orderId).orElseThrow();
+
+        OrderStatus oldStatus = order.getStatus();
         order.setStatus(status);
+        eventPublisher.publishEvent(new OrderStatusUpdatedEvent(order, oldStatus));
         return toResponse(repository.save(order));
     }
+
 
     public OrderResponse uploadProof(Long orderId, MultipartFile file) throws IOException {
         Order order = repository.findById(orderId).orElseThrow();

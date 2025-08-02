@@ -10,7 +10,7 @@ public class TrackingLocation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String trackingId;
+    private Long trackingId;
     private double latitude;
     private double longitude;
     private String timestamp;

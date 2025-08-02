@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class UpdateLocationResponse {
-    private String trackingId;
+    private Long trackingId;
     private String status;
 }
