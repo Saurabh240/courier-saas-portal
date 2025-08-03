@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class LocationTimelineResponse {
     private Long trackingId;
-    private List<TimeLineEntry> timeline;
+    private List<TimelineRecord> timeline;
 }

@@ -24,16 +24,18 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public StartTrackingResponse startTracking(StartTrackingRequest request) {
 
-        StartTrackingResponse startTrackingResponse=new StartTrackingResponse();
-        startTrackingResponse.setStatus("started");
 
         Tracking tracking=new Tracking();
-        tracking.setTrackingId(startTrackingResponse.getTrackingId());
-        tracking.setStatus(startTrackingResponse.getStatus());
+        tracking.setStatus("started");
         tracking.setAgentId(request.getAgentId());
         tracking.setOrderId(request.getOrderId());
         tracking.setPickupTime(request.getPickupTime());
         Tracking savedTracking=trackingRepository.save(tracking);
+
+        StartTrackingResponse startTrackingResponse=new StartTrackingResponse();
+        startTrackingResponse.setTrackingId(tracking.getTrackingId());
+        startTrackingResponse.setStatus(tracking.getStatus());
+
 
         return startTrackingResponse;
     }
@@ -58,17 +60,25 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public LocationTimelineResponse getTimeline(Long trackingId) {
+
         List<TrackingLocation> trackingLocationList=trackingLocationRepository.findByTrackingIdOrderByTimestampAsc(trackingId);
+
         LocationTimelineResponse locationTimelineResponse=new LocationTimelineResponse();
         locationTimelineResponse.setTrackingId(trackingId);
+
         List<TimelineRecord> timeLine=new ArrayList<>();
+
         for(TrackingLocation trackingLocation:trackingLocationList){
             Location location=new Location(trackingLocation.getLatitude(),trackingLocation.getLongitude());
             String timeStamp=trackingLocation.getTimestamp();
             String status=trackingLocation.getStatus();
             TimelineRecord timelineRecord=new TimelineRecord(location,timeStamp,status);
+            System.out.println(timelineRecord.toString());
             timeLine.add(timelineRecord);
         }
+
+        locationTimelineResponse.setTimeline(timeLine);
+
         return locationTimelineResponse;
     }
 }
