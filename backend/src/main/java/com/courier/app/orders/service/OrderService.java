@@ -59,6 +59,24 @@ public class OrderService {
         return toDetailsResponse(savedOrder);
     }
 
+    public OrderDetailsResponse updateOrder(Long id, OrderUpdateRequest request) {
+        Order order = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+
+        if (request.getReceiverName() != null) order.setReceiverName(request.getReceiverName());
+        if (request.getDeliveryAddress() != null) order.setDeliveryAddress(request.getDeliveryAddress());
+        if (request.getPackageWeightKg() != null) order.setPackageWeightKg(request.getPackageWeightKg());
+        if (request.getPackageLengthCm() != null) order.setPackageLengthCm(request.getPackageLengthCm());
+        if (request.getPackageWidthCm() != null) order.setPackageWidthCm(request.getPackageWidthCm());
+        if (request.getPackageHeightCm() != null) order.setPackageHeightCm(request.getPackageHeightCm());
+        if (request.getDeliveryPhone() != null) order.setDeliveryPhone(request.getDeliveryPhone());
+        if (request.getPickupTimeWindow() != null) order.setPickupTimeWindow(request.getPickupTimeWindow());
+        if (request.getSpecialInstructions() != null) order.setSpecialInstructions(request.getSpecialInstructions());
+        if (request.getIsFragile() != null) {order.setFragile(request.getIsFragile());}
+        if (request.getDeliveryType() != null) order.setDeliveryType(request.getDeliveryType());
+        repository.save(order);
+        return toDetailsResponse(order);
+    }
 
     public List<OrderResponse> getAllOrders(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);

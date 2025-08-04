@@ -1,9 +1,6 @@
 package com.courier.app.orders.controller;
 
-import com.courier.app.orders.model.OrderDetailsResponse;
-import com.courier.app.orders.model.OrderRequest;
-import com.courier.app.orders.model.OrderResponse;
-import com.courier.app.orders.model.OrderStatus;
+import com.courier.app.orders.model.*;
 import com.courier.app.orders.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +33,13 @@ public class OrderController {
     ) {
         return service.getAllOrders(page, size);
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    public OrderDetailsResponse updateOrder(@PathVariable Long id, @RequestBody OrderUpdateRequest request) {
+        return service.updateOrder(id, request);
+    }
+
 
     @GetMapping("/customer")
     @PreAuthorize("hasRole('CUSTOMER')")
@@ -74,8 +78,6 @@ public class OrderController {
         OrderDetailsResponse response = service.getOrderById(id);
         return ResponseEntity.ok(response);
     }
-
-
 
 
 }
