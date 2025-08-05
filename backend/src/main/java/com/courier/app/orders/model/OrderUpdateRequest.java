@@ -1,21 +1,18 @@
 package com.courier.app.orders.model;
 
-import lombok.Data;
-
-@Data
-public class OrderUpdateRequest {
-    private String senderName;
-    private String receiverName;
-    private String pickupAddress;
-    private String deliveryAddress;
-    private Double packageWeightKg;
-    private Double packageLengthCm;
-    private Double packageWidthCm;
-    private Double packageHeightCm;
-    private String pickupPhone;
-    private String deliveryPhone;
-    private String pickupTimeWindow;
-    private String specialInstructions;
-    private Boolean isFragile;
-    private DeliveryType deliveryType;
-}
+public record OrderUpdateRequest(
+        String senderName,
+        String receiverName,
+        String pickupAddress,
+        String deliveryAddress,
+        Double packageWeightKg,
+        Double packageLengthCm,
+        Double packageWidthCm,
+        Double packageHeightCm,
+        String pickupPhone,
+        String deliveryPhone,
+        String pickupTimeWindow,
+        String specialInstructions,
+        Boolean isFragile,
+        DeliveryType deliveryType
+) {}

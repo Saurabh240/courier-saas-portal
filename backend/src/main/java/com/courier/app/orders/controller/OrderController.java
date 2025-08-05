@@ -35,7 +35,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')")
     public OrderDetailsResponse updateOrder(@PathVariable Long id, @RequestBody OrderUpdateRequest request) {
         return service.updateOrder(id, request);
     }

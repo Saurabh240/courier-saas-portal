@@ -9,6 +9,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.courier.app.orders.model.OrderRequest;
 
@@ -60,27 +64,42 @@ public class OrderService {
     }
 
     public OrderDetailsResponse updateOrder(Long id, OrderUpdateRequest request) {
-        Order order = repository.findById(id)
+        return repository.findById(id)
+                .map(order -> {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+                    boolean isCustomer = auth.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"));
+
+                    if (isCustomer) {
+                        // If not PENDING, deny access
+                        if (order.getStatus() != OrderStatus.PENDING) {
+                            throw new AccessDeniedException("Customers can only update orders in PENDING status.");
+                        }
+                    }
+
+                    Optional.ofNullable(request.senderName()).ifPresent(order::setSenderName);
+                    Optional.ofNullable(request.receiverName()).ifPresent(order::setReceiverName);
+                    Optional.ofNullable(request.pickupAddress()).ifPresent(order::setPickupAddress);
+                    Optional.ofNullable(request.deliveryAddress()).ifPresent(order::setDeliveryAddress);
+                    Optional.ofNullable(request.packageWeightKg()).ifPresent(order::setPackageWeightKg);
+                    Optional.ofNullable(request.packageLengthCm()).ifPresent(order::setPackageLengthCm);
+                    Optional.ofNullable(request.packageWidthCm()).ifPresent(order::setPackageWidthCm);
+                    Optional.ofNullable(request.packageHeightCm()).ifPresent(order::setPackageHeightCm);
+                    Optional.ofNullable(request.pickupPhone()).ifPresent(order::setPickupPhone);
+                    Optional.ofNullable(request.deliveryPhone()).ifPresent(order::setDeliveryPhone);
+                    Optional.ofNullable(request.pickupTimeWindow()).ifPresent(order::setPickupTimeWindow);
+                    Optional.ofNullable(request.specialInstructions()).ifPresent(order::setSpecialInstructions);
+                    Optional.ofNullable(request.isFragile()).ifPresent(order::setFragile);
+                    Optional.ofNullable(request.deliveryType()).ifPresent(order::setDeliveryType);
+
+                    return repository.save(order);
+                })
+                .map(this::toDetailsResponse)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
-
-        if (request.getSenderName() != null) order.setSenderName(request.getSenderName());
-        if (request.getReceiverName() != null) order.setReceiverName(request.getReceiverName());
-        if (request.getPickupAddress() != null) order.setPickupAddress(request.getPickupAddress());
-        if (request.getDeliveryAddress() != null) order.setDeliveryAddress(request.getDeliveryAddress());
-        if (request.getPackageWeightKg() != null) order.setPackageWeightKg(request.getPackageWeightKg());
-        if (request.getPackageLengthCm() != null) order.setPackageLengthCm(request.getPackageLengthCm());
-        if (request.getPackageWidthCm() != null) order.setPackageWidthCm(request.getPackageWidthCm());
-        if (request.getPackageHeightCm() != null) order.setPackageHeightCm(request.getPackageHeightCm());
-        if (request.getPickupPhone() != null) order.setPickupPhone(request.getPickupPhone());
-        if (request.getDeliveryPhone() != null) order.setDeliveryPhone(request.getDeliveryPhone());
-        if (request.getPickupTimeWindow() != null) order.setPickupTimeWindow(request.getPickupTimeWindow());
-        if (request.getSpecialInstructions() != null) order.setSpecialInstructions(request.getSpecialInstructions());
-        if (request.getIsFragile() != null) order.setFragile(request.getIsFragile());
-        if (request.getDeliveryType() != null) order.setDeliveryType(request.getDeliveryType());
-
-        repository.save(order);
-        return toDetailsResponse(order);
     }
+
+
 
 
     public List<OrderResponse> getAllOrders(int page, int size) {
