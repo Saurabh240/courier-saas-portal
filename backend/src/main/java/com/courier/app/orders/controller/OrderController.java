@@ -32,9 +32,10 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public List<OrderResponse> all(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "25") int size
+            @RequestParam(defaultValue = "25") int size,
+            @RequestParam(required= false) OrderStatus status
     ) {
-        return service.getAllOrders(page, size);
+        return service.getAllOrders(page, size,status);
     }
 
     @GetMapping("/customer")

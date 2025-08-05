@@ -59,15 +59,20 @@ public class OrderService {
         return toDetailsResponse(savedOrder);
     }
 
-
-    public List<OrderResponse> getAllOrders(int page, int size) {
+    public List<OrderResponse> getAllOrders(int page, int size, OrderStatus status) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Order> pagedOrders = repository.findAll(pageable);
+        Page<Order> pagedOrders;
+        if (status != null) {
+            pagedOrders = repository.findByStatus(status, pageable);
+        } else {
+            pagedOrders = repository.findAll(pageable);
+        }
         return pagedOrders
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
 
     public List<OrderResponse> getOrdersForCustomer(String email) {
         return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
