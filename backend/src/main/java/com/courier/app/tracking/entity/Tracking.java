@@ -8,8 +8,8 @@ import lombok.Data;
 public class Tracking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String trackingId;
-    private String orderId;
+    private Long trackingId;
+    private Long orderId;
     private String agentId;
     private String status;
     private String pickupTime;

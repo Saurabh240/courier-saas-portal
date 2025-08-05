@@ -39,7 +39,7 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public UpdateLocationResponse updateLocation(String trackingId, UpdateLocationRequest request) {
+    public UpdateLocationResponse updateLocation(Long trackingId, UpdateLocationRequest request) {
 
         UpdateLocationResponse updateLocationResponse=new UpdateLocationResponse();
         updateLocationResponse.setTrackingId(trackingId);
@@ -57,7 +57,7 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public LocationTimelineResponse getTimeline(String trackingId) {
+    public LocationTimelineResponse getTimeline(Long trackingId) {
         List<TrackingLocation> trackingLocationList=trackingLocationRepository.findByTrackingIdOrderByTimestampAsc(trackingId);
         LocationTimelineResponse locationTimelineResponse=new LocationTimelineResponse();
         locationTimelineResponse.setTrackingId(trackingId);
