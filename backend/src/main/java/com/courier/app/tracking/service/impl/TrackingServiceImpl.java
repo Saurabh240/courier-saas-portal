@@ -73,7 +73,6 @@ public class TrackingServiceImpl implements TrackingService {
             String timeStamp=trackingLocation.getTimestamp();
             String status=trackingLocation.getStatus();
             TimelineRecord timelineRecord=new TimelineRecord(location,timeStamp,status);
-            System.out.println(timelineRecord.toString());
             timeLine.add(timelineRecord);
         }
 
