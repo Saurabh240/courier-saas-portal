@@ -99,17 +99,20 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
     }
 
-
-
-
-    public List<OrderResponse> getAllOrders(int page, int size) {
+    public List<OrderResponse> getAllOrders(int page, int size, OrderStatus status) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Order> pagedOrders = repository.findAll(pageable);
+        Page<Order> pagedOrders;
+        if (status != null) {
+            pagedOrders = repository.findByStatus(status, pageable);
+        } else {
+            pagedOrders = repository.findAll(pageable);
+        }
         return pagedOrders
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
 
     public List<OrderResponse> getOrdersForCustomer(String email) {
         return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
@@ -134,7 +137,6 @@ public class OrderService {
         return toResponse(repository.save(order));
     }
 
-
     public OrderResponse uploadProof(Long orderId, MultipartFile file) throws IOException {
         Order order = repository.findById(orderId).orElseThrow();
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
@@ -149,9 +151,11 @@ public class OrderService {
         order.setStatus(OrderStatus.DELIVERED);
         return toResponse(repository.save(order));
     }
+  
     private double roundTo(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
+  
     private OrderDetailsResponse toDetailsResponse(Order order) {
         return new OrderDetailsResponse(
                 order.getId(),
@@ -228,5 +232,4 @@ public class OrderService {
                 order.getDeliveryProofPath()
         );
     }
-
 }
