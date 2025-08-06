@@ -40,7 +40,6 @@ import java.util.List;
         if (!isValidTransition(oldStatus, newStatus)) {
             throw new IllegalStateException("Invalid status transition from " + oldStatus + " to " + newStatus);
         }
-
         order.setStatus(newStatus);
         orderRepository.save(order);
 

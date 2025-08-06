@@ -72,7 +72,6 @@ public class OrderService {
                             .anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"));
 
                     if (isCustomer) {
-                        // If not PENDING, deny access
                         if (order.getStatus() != OrderStatus.PENDING) {
                             throw new AccessDeniedException("Customers can only update orders in PENDING status.");
                         }
