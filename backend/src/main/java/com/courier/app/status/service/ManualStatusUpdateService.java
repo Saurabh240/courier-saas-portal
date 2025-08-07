@@ -23,8 +23,7 @@ import java.util.List;
     private OrderRepository orderRepository;
     private boolean isValidTransition(OrderStatus oldStatus, OrderStatus newStatus) {
         return switch (oldStatus) {
-            case PENDING -> newStatus == OrderStatus.CREATED || newStatus == OrderStatus.CANCELLED;
-            case CREATED -> newStatus == OrderStatus.PICKED_UP || newStatus == OrderStatus.CANCELLED;
+            case PENDING -> newStatus == OrderStatus.PICKED_UP || newStatus == OrderStatus.CANCELLED;
             case PICKED_UP -> newStatus == OrderStatus.IN_TRANSIT || newStatus == OrderStatus.CANCELLED;
             case IN_TRANSIT -> newStatus == OrderStatus.DELIVERED || newStatus == OrderStatus.CANCELLED;
             case DELIVERED, CANCELLED -> false;
