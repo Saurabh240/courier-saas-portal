@@ -1,9 +1,4 @@
 # Courier Aggregators – Shiprocket & Delhivery (Frontend vs Backend Tasks)
-
-This plan separates work for **A) Shiprocket**, **B) Delhivery**, and **C) Aggregator Switch**. It includes API contracts, payloads, security, data model, webhooks/polling, QA scenarios, and definition of done for interns.
-
-> Notes: Keep tenant separation (company\_id from JWT). Use feature flags to enable/disable providers per company.
-
 ---
 
 ## A) 📦 Shiprocket Integration Scaffold
@@ -315,9 +310,3 @@ public interface CourierProviderService {
 ```
 
 ---
-
-## Nice-to-have
-
-* Sandbox/test mode toggle per provider (if available).
-* Automatic address normalization & pincode validation against provider APIs.
-* Dashboard widget: external shipment SLAs, exception alerts.
