@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/admin/settings")
 @RequiredArgsConstructor
@@ -36,4 +38,12 @@ public class TenantSettingsController {
     public void deleteSettings() {
         service.deleteSettingsForCurrentTenant();
     }
+
+    @PreAuthorize("hasRole('ADMIN',''STAFF)")
+    @PostMapping("/tenants")
+    public String createTenant(@RequestParam UUID tenantId) {
+        service.createTenant(tenantId);
+        return "Tenant '" + tenantId + "' created successfully.";
+    }
+
 }
