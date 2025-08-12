@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -31,7 +30,7 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
 
     @Override
     public TenantSettingsDTO getSettingsForCurrentTenant() {
-        UUID tenantId = getCurrentTenantId();
+        String tenantId = getCurrentTenantId();
         TenantSettings settings = repository.findByTenantId(tenantId)
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
         return toDto(settings);
@@ -39,10 +38,10 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
 
     @Override
     public TenantSettingsDTO saveOrUpdateSettings(TenantSettingsDTO dto) {
-        UUID tenantId = getCurrentTenantId();
+        String tenantId = getCurrentTenantId();
         validateSettings(dto);
         TenantSettings entity = repository.findByTenantId(tenantId).orElse(new TenantSettings());
-        entity.setTenantId(tenantId);
+        entity.setTenantId(dto.getBrandName());
         entity.setBusinessHours(toJson(dto.getBusinessHours()));
         entity.setBrandName(dto.getBrandName());
         entity.setLogoUrl(dto.getLogoUrl());
@@ -56,7 +55,7 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
 
     @Override
     public void deleteSettingsForCurrentTenant() {
-        UUID tenantId = getCurrentTenantId();
+        String tenantId = getCurrentTenantId();
         repository.deleteByTenantId(tenantId);
     }
     // Utility methods
@@ -98,13 +97,13 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
         }
     }
 
-    private UUID getCurrentTenantId() {
+    private String getCurrentTenantId() {
         // TODO: Replace this with real tenant extraction from security context or token
-        return UUID.fromString("00000000-0000-0000-0000-000000000001");
+        return "tenantId";
     }
 
     @Transactional
-    public void createTenant(UUID tenantId) {
+    public void createTenant(String tenantId) {
         // Create schema for this tenant
         entityManager.createNativeQuery("CREATE SCHEMA IF NOT EXISTS " + tenantId).executeUpdate();
         // Create and save default settings

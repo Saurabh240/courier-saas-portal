@@ -39,9 +39,9 @@ public class TenantSettingsController {
         service.deleteSettingsForCurrentTenant();
     }
 
-    @PreAuthorize("hasRole('ADMIN',''STAFF)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     @PostMapping("/tenants")
-    public String createTenant(@RequestParam UUID tenantId) {
+    public String createTenant(@RequestParam String tenantId) {
         service.createTenant(tenantId);
         return "Tenant '" + tenantId + "' created successfully.";
     }

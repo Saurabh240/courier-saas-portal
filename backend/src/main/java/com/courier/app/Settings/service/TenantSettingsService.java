@@ -8,5 +8,5 @@ public interface TenantSettingsService {
     TenantSettingsDTO getSettingsForCurrentTenant();
     TenantSettingsDTO saveOrUpdateSettings(TenantSettingsDTO dto);
     void deleteSettingsForCurrentTenant();
-    void createTenant(UUID tenantId);
+    void createTenant(String tenantId);
 }
