@@ -1,11 +1,14 @@
 package com.courier.app.Settings.service.impl;
 
+import com.courier.app.Settings.config.TenantDefaultProperties;
 import com.courier.app.Settings.dto.TenantSettingsDTO;
 import com.courier.app.Settings.model.TenantSettings;
 import com.courier.app.Settings.repository.TenantSettingsRepository;
 import com.courier.app.Settings.service.TenantSettingsService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,8 +22,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TenantSettingsServiceImpl implements TenantSettingsService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final TenantSettingsRepository repository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final TenantDefaultProperties defaultProperties;
 
     @Override
     public TenantSettingsDTO getSettingsForCurrentTenant() {
@@ -33,9 +40,7 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
     @Override
     public TenantSettingsDTO saveOrUpdateSettings(TenantSettingsDTO dto) {
         UUID tenantId = getCurrentTenantId();
-
         validateSettings(dto);
-
         TenantSettings entity = repository.findByTenantId(tenantId).orElse(new TenantSettings());
         entity.setTenantId(tenantId);
         entity.setBusinessHours(toJson(dto.getBusinessHours()));
@@ -54,9 +59,7 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
         UUID tenantId = getCurrentTenantId();
         repository.deleteByTenantId(tenantId);
     }
-
     // Utility methods
-
     private TenantSettingsDTO toDto(TenantSettings entity) {
         TenantSettingsDTO dto = new TenantSettingsDTO();
         dto.setBusinessHours(fromJson(entity.getBusinessHours()));
@@ -67,7 +70,6 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
         dto.setTimezone(entity.getTimezone());
         return dto;
     }
-
     private String toJson(Map<String, String> map) {
         try {
             return objectMapper.writeValueAsString(map);
@@ -100,5 +102,24 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
         // TODO: Replace this with real tenant extraction from security context or token
         return UUID.fromString("00000000-0000-0000-0000-000000000001");
     }
+
+    @Transactional
+    public void createTenant(UUID tenantId) {
+        // Create schema for this tenant
+        entityManager.createNativeQuery("CREATE SCHEMA IF NOT EXISTS " + tenantId).executeUpdate();
+        // Create and save default settings
+        TenantSettings settings = new TenantSettings();
+        settings.setTenantId(tenantId);
+        settings.setBusinessHours(defaultProperties.getBusinessHours());
+        settings.setBrandName(defaultProperties.getBrandName());
+        settings.setLogoUrl(defaultProperties.getLogoUrl());
+        settings.setPrimaryColor(defaultProperties.getPrimaryColor());
+        settings.setSecondaryColor(defaultProperties.getSecondaryColor());
+        settings.setTimezone(defaultProperties.getTimezone());
+
+        repository.save(settings);
+    }
+
+
 }
 

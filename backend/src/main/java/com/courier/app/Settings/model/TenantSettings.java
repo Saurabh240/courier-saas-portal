@@ -16,19 +16,15 @@ public class TenantSettings {
     @Id
     @GeneratedValue
     private UUID id;
-
     @Column(nullable = false, unique = true)
     private UUID tenantId;
-
     @Column(columnDefinition = "TEXT")
     private String businessHours;
-
     private String brandName;
     private String logoUrl;
     private String primaryColor;
     private String secondaryColor;
     private String timezone;
-
     private Instant createdAt;
     private Instant updatedAt;
 
