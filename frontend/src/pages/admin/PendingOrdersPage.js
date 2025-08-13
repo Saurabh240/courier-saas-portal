@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import OrderTable from "../../components/OrderTable";
 import Layout from "../../components/Layout";
 
@@ -9,144 +8,121 @@ const baseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 export default function PendingOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [filters, setFilters] = useState({
+    id: "",
     sender: "",
     receiver: "",
-    email: "",
   });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const navigate = useNavigate();
   const pageSize = 25;
-  const [hasNextPage, setHasNextPage] = useState(false);
 
-  const fetchOrders = useCallback(async (page = 1, searchFilters = {}) => {
-    setLoading(true);
-    setError(null);
+  // Fetch all pending orders once
+  useEffect(() => {
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        size: pageSize.toString(),
-        status: "CREATED",
-      });
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("No authentication token found. Please login again.");
 
-      if (searchFilters.sender)
-        params.append("senderName", searchFilters.sender);
-      if (searchFilters.receiver)
-        params.append("receiverName", searchFilters.receiver);
-      if (searchFilters.email)
-        params.append("customerEmail", searchFilters.email);
+        const response = await fetch(
+          `${baseUrl}/api/orders?status=PENDING`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("No authentication token found. Please login again.");
-      }
-
-      const response = await fetch(
-        `${baseUrl}/api/orders?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          throw new Error("Session expired. Please login again.");
         }
-      );
 
-      if (response.status === 401) {
-        localStorage.removeItem("token");
-        throw new Error("Session expired. Please login again.");
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        const orderList = Array.isArray(data) ? data : data.content || [];
+        setOrders(orderList);
+        setFilteredOrders(orderList);
+      } catch (err) {
+        setError(err.message);
+        setOrders([]);
+        setFilteredOrders([]);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const orderList = Array.isArray(data) ? data : data.content || [];
-      setOrders(orderList);
-      setTotalItems(
-        data.totalElements || (page - 1) * pageSize + orderList.length
-      );
-      setHasNextPage(
-        orderList.length === pageSize &&
-          (data.totalPages ? page < data.totalPages : true)
-      );
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-      setError(err.message);
-      setOrders([]);
-      setTotalItems(0);
-    } finally {
-      setLoading(false);
-    }
+    fetchOrders();
   }, []);
 
+  //  frontend filtering
   useEffect(() => {
-    fetchOrders(currentPage, filters);
-  }, [currentPage, filters, fetchOrders]);
+    const result = orders.filter((order) => {
+  const matchId =
+    !filters.id ||
+    String( order.orderId ?? "").toLowerCase().includes(filters.id.toLowerCase());
+
+  const matchSender =
+    !filters.sender ||
+    (order.senderName ?? "").toLowerCase().includes(filters.sender.toLowerCase());
+
+  const matchReceiver =
+    !filters.receiver ||
+    (order.receiverName ?? "").toLowerCase().includes(filters.receiver.toLowerCase());
+      return matchId && matchSender && matchReceiver;
+    });
+
+    setFilteredOrders(result);
+    setCurrentPage(1); // reset page when filter changes
+  }, [filters, orders]);
+
+  const totalItems = filteredOrders.length;
+  const startIndex = totalItems > 0 ? (currentPage - 1) * pageSize : 0;
+  const endIndex = totalItems > 0 ? Math.min(startIndex + pageSize, totalItems) : 0;
+
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
   const onFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-    setCurrentPage(1);
   };
 
-  const onPageChange = (newPage) => setCurrentPage(newPage);
-
-  const navigate = useNavigate();
+  const onPageChange = (page) => setCurrentPage(page);
 
   const onOrderClick = (orderId) => {
     navigate(`/admin/orders/${orderId}`);
   };
 
   return (
-    <Layout userType="admin" >
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Pending Orders</h2>
-      </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-red-400 mr-3"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <div>
-              <p className="text-red-700 font-medium">Authentication Error</p>
-              <p className="text-red-600 text-sm">{error}</p>
-              {error.includes("Session expired") && (
-                <p className="text-red-600 text-xs mt-1">
-                  Please refresh the page and login again.
-                </p>
-              )}
-            </div>
-          </div>
+    <Layout userType="admin">
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Pending Orders</h2>
         </div>
-      )}
 
-      <OrderTable
-        orders={orders}
-        currentPage={currentPage}
-        totalItems={totalItems}
-        onPageChange={onPageChange}
-        filters={filters}
-        onFilterChange={onFilterChange}
-        loading={loading}
-        hasNextPage={hasNextPage}
-        onOrderClick={onOrderClick}
-      />
-    </div>
+        {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">{error}</div>}
+
+        <OrderTable
+          orders={paginatedOrders}
+          totalItems={totalItems}
+          currentPage={currentPage}
+          pageSize={pageSize}
+          onPageChange={onPageChange}
+          filters={filters}
+          onFilterChange={onFilterChange}
+          loading={loading}
+          hasNextPage={endIndex < totalItems}
+          onOrderClick={onOrderClick}
+        />
+      </div>
     </Layout>
   );
 }
