@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import React, { useEffect } from "react";
 import SideBar from "./SideBar";
+
 const Layout = ({ userType, children }) => {
-   useEffect(() => {
+  useEffect(() => {
     const siteTitle = process.env.REACT_APP_SITE_TITLE || "Courier Portal";
     document.title = siteTitle;
   }, []);
+
   return (
     <div className="flex min-h-screen bg-white text-black">
       {/* Fixed Sidebar */}
@@ -13,9 +15,7 @@ const Layout = ({ userType, children }) => {
       </div>
 
       {/* Main Content shifted to the right */}
-      <main className="flex-1 p-6 ml-64">
-        {children}
-      </main>
+      <main className="flex-1 p-6 ml-64">{children}</main>
     </div>
   );
 };
