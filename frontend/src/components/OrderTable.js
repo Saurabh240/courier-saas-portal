@@ -1,5 +1,4 @@
-import React from "react";
-
+import ActionMenu from "./ActionMenu";
 export default function OrderTable({
   orders,
   totalItems,
@@ -84,42 +83,47 @@ export default function OrderTable({
   return (
     <div>
       {/* Search Filters */}
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
+      <div className="p-4  border-b border-gray-200 bg-gray-50">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search by ID */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              🔍 Search by Sender
+              🆔 Search by ID
+            </label>
+            <input
+              type="text"
+              placeholder="Enter ID..."
+              value={filters.id || ""}
+              onChange={(e) => onFilterChange("id", e.target.value)}
+              className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
+            />
+          </div>
+
+          {/* Search by Sender Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🔍 Search by Sender Name
             </label>
             <input
               type="text"
               placeholder="Enter sender name..."
               value={filters.sender || ""}
               onChange={(e) => onFilterChange("sender", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
+              className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
             />
           </div>
+
+          {/* Search by Receiver Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              👤 Search by Receiver
+              👤 Search by Receiver Name
             </label>
             <input
               type="text"
               placeholder="Enter receiver name..."
               value={filters.receiver || ""}
               onChange={(e) => onFilterChange("receiver", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ✉️ Search by Sender Email
-            </label>
-            <input
-              type="text"
-              placeholder="Enter customer email..."
-              value={filters.email || ""}
-              onChange={(e) => onFilterChange("email", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
+              className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
             />
           </div>
         </div>
@@ -128,7 +132,7 @@ export default function OrderTable({
       {/* Loading State */}
       {loading && (
         <div className="p-12 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-10 border-b-4 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600 font-medium">Loading orders...</p>
         </div>
       )}
@@ -141,31 +145,35 @@ export default function OrderTable({
             role="table"
             aria-label="Orders table"
           >
-            <thead className="bg-gray-800 text-white">
+            <thead className="bg-gray-900 text-white">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Order ID
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Sender
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Receiver
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Addresses
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Payment & Value
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Delivery Type
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
                   Invoice Status
+                </th>
+                <th className="px-4 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                  {" "}
+                  {/*Three Dot Menu */}{" "}
                 </th>
               </tr>
             </thead>
@@ -178,7 +186,7 @@ export default function OrderTable({
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     }`}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <button
                         onClick={() =>
                           onOrderClick && onOrderClick(order.orderId)
@@ -188,17 +196,17 @@ export default function OrderTable({
                         #{order.orderId}
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {order.senderName || "N/A"}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {order.receiverName || "N/A"}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <div className="text-sm">
                         <div className="mb-2">
                           <span className="text-s font-medium text-gray-500">
@@ -218,7 +226,7 @@ export default function OrderTable({
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <div className="text-sm">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-medium rounded-md ${getPaymentModeColor(
@@ -235,7 +243,7 @@ export default function OrderTable({
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-medium rounded-md ${getDeliveryTypeColor(
                           order.deliveryType
@@ -244,7 +252,7 @@ export default function OrderTable({
                         {order.deliveryType || "STANDARD"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(
                           order.status
@@ -255,7 +263,7 @@ export default function OrderTable({
                           : "CREATED"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getInvoiceStatusColor(
                           order.invoiceStatus
@@ -263,6 +271,18 @@ export default function OrderTable({
                       >
                         {order.invoiceStatus || "PENDING"}
                       </span>
+                    </td>
+                    {/*Three Dot Menu start */}
+                    <td className="p-3 border-b text-center">
+                      <ActionMenu
+                        order={order}
+                        options={{
+                          viewDetails: true,
+                          editOrder: true,
+                          sendEmail: true,
+                        }}
+                      />
+                      {/*Three Dot Menu start */}
                     </td>
                   </tr>
                 ))
@@ -298,9 +318,9 @@ export default function OrderTable({
         </div>
       )}
 
-      {/* Enhanced Pagination */}
+      {/*  Pagination */}
       {!loading && orders && orders.length > 0 && (
-        <div className="px-6 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+        <div className="px-4 py-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-800">
@@ -321,7 +341,7 @@ export default function OrderTable({
               <button
                 disabled={currentPage === 1}
                 onClick={() => onPageChange && onPageChange(currentPage - 1)}
-                className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
                   currentPage === 1
                     ? "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-blue-200 hover:border-blue-400 hover:text-blue-600 shadow-sm hover:shadow-md"
@@ -344,14 +364,14 @@ export default function OrderTable({
                 Previous
               </button>
 
-              <div className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">
+              <div className="bg-blue-600 text-white px-2 py-2 rounded-lg text-sm font-bold">
                 {currentPage}
               </div>
 
               <button
                 disabled={!hasNextPage}
                 onClick={() => onPageChange && onPageChange(currentPage + 1)}
-                className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                className={`flex items-center px-2 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
                   !hasNextPage
                     ? "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 shadow-sm hover:shadow-md"
