@@ -7,8 +7,7 @@ import lombok.Data;
 
 @Data
 public class StartTrackingResponse {
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private String trackingId;
+
+    private Long trackingId;
     private String status;
 }

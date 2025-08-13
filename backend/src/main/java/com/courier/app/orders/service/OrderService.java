@@ -1,11 +1,17 @@
 package com.courier.app.orders.service;
+import com.courier.app.orders.events.OrderCreatedEvent;
+import com.courier.app.orders.events.OrderStatusUpdatedEvent;
 import com.courier.app.orders.model.*;
 import com.courier.app.orders.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.courier.app.orders.model.OrderRequest;
 
@@ -23,6 +30,8 @@ import com.courier.app.orders.model.OrderRequest;
 public class OrderService {
     @Autowired
     private OrderRepository repository;
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Value("${upload.dir:uploads}")
     private String uploadDir;
@@ -48,17 +57,61 @@ public class OrderService {
         order.setDeclaredValue(request.declaredValue());
         order.setFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
-        return toDetailsResponse(repository.save(order));
+        Order savedOrder = repository.save(order);
+        eventPublisher.publishEvent(new OrderCreatedEvent(savedOrder));
+
+        return toDetailsResponse(savedOrder);
     }
 
-    public List<OrderResponse> getAllOrders(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size); // Spring pages are 0-indexed
-        Page<Order> pagedOrders = repository.findAll(pageable);
+    public OrderDetailsResponse updateOrder(Long id, OrderUpdateRequest request) {
+        return repository.findById(id)
+                .map(order -> {
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+                    boolean isCustomer = auth.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_CUSTOMER"));
+
+                    if (isCustomer) {
+                        if (order.getStatus() != OrderStatus.PENDING) {
+                            throw new AccessDeniedException("Customers can only update orders in PENDING status.");
+                        }
+                    }
+
+                    Optional.ofNullable(request.senderName()).ifPresent(order::setSenderName);
+                    Optional.ofNullable(request.receiverName()).ifPresent(order::setReceiverName);
+                    Optional.ofNullable(request.pickupAddress()).ifPresent(order::setPickupAddress);
+                    Optional.ofNullable(request.deliveryAddress()).ifPresent(order::setDeliveryAddress);
+                    Optional.ofNullable(request.packageWeightKg()).ifPresent(order::setPackageWeightKg);
+                    Optional.ofNullable(request.packageLengthCm()).ifPresent(order::setPackageLengthCm);
+                    Optional.ofNullable(request.packageWidthCm()).ifPresent(order::setPackageWidthCm);
+                    Optional.ofNullable(request.packageHeightCm()).ifPresent(order::setPackageHeightCm);
+                    Optional.ofNullable(request.pickupPhone()).ifPresent(order::setPickupPhone);
+                    Optional.ofNullable(request.deliveryPhone()).ifPresent(order::setDeliveryPhone);
+                    Optional.ofNullable(request.pickupTimeWindow()).ifPresent(order::setPickupTimeWindow);
+                    Optional.ofNullable(request.specialInstructions()).ifPresent(order::setSpecialInstructions);
+                    Optional.ofNullable(request.isFragile()).ifPresent(order::setFragile);
+                    Optional.ofNullable(request.deliveryType()).ifPresent(order::setDeliveryType);
+
+                    return repository.save(order);
+                })
+                .map(this::toDetailsResponse)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+    }
+
+    public List<OrderResponse> getAllOrders(int page, int size, OrderStatus status) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Order> pagedOrders;
+        if (status != null) {
+            pagedOrders = repository.findByStatus(status, pageable);
+        } else {
+            pagedOrders = repository.findAll(pageable);
+        }
         return pagedOrders
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
 
     public List<OrderResponse> getOrdersForCustomer(String email) {
         return repository.findByCustomerEmail(email).stream().map(this::toResponse).toList();
@@ -76,7 +129,10 @@ public class OrderService {
 
     public OrderResponse updateStatus(Long orderId, OrderStatus status) {
         Order order = repository.findById(orderId).orElseThrow();
+
+        OrderStatus oldStatus = order.getStatus();
         order.setStatus(status);
+        eventPublisher.publishEvent(new OrderStatusUpdatedEvent(order, oldStatus));
         return toResponse(repository.save(order));
     }
 
@@ -94,9 +150,11 @@ public class OrderService {
         order.setStatus(OrderStatus.DELIVERED);
         return toResponse(repository.save(order));
     }
+  
     private double roundTo(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
+  
     private OrderDetailsResponse toDetailsResponse(Order order) {
         return new OrderDetailsResponse(
                 order.getId(),
@@ -173,5 +231,4 @@ public class OrderService {
                 order.getDeliveryProofPath()
         );
     }
-
 }

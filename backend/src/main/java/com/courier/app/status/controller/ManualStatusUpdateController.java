@@ -23,7 +23,6 @@ public class ManualStatusUpdateController {
     ) {
         return service.recordUpdate(request, authentication.getName());
     }
-
     @GetMapping("/{orderId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'DELIVERY_PARTNER', 'CUSTOMER')")
     public List<ManualStatusUpdateResponse> history(@PathVariable Long orderId) {

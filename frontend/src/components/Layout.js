@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import SideBar from "./SideBar";
-
 const Layout = ({ userType, children }) => {
    useEffect(() => {
     const siteTitle = process.env.REACT_APP_SITE_TITLE || "Courier Portal";
