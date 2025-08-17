@@ -54,7 +54,7 @@ Description:
 Get a list of orders created between the given start and end dates.
 
 Example Request: 
-`GET http://localhost:8080/api/dashboard?start=2025-06-22&end=2025-06-29`
+GET http://localhost:8080/api/dashboard?start=2025-06-22&end=2025-06-29`
 
 Response (200 OK):
 json
