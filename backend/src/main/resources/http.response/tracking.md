@@ -11,7 +11,7 @@
 ### 📤 Request Body (JSON)
 ```json
 {
-  "orderId": 14,
+  "orderId": 1,
   "pickupTime": "07:33",
   "agentId": "8"
 }
@@ -20,7 +20,7 @@
 ### 📤 Response Body (JSON) 
 ```json
 {
-    "trackingId": 5,
+    "trackingId": 1,
     "status": "started"
 }
 ```
@@ -45,7 +45,7 @@
 ### 📤 Response Body (JSON)
 ```json
 {
-    "trackingId": 11,
+    "trackingId": 1,
     "status": "location updated"
 }
 ```
@@ -58,6 +58,22 @@
 - **Type**: GET
 - **URL**: http://localhost:8080/api/tracking/{trackingId}/timeline
 - **Request Name**: Get Timeline
+ ### 📤 Response Body (JSON)
+```json
+{
+    "trackingId": 1,
+    "timeline": [
+        {
+            "location": {
+                "latitude": 40.7128,
+                "longitude": -74.006
+            },
+            "timeStamp": "2025-08-02T16:00:00Z",
+            "status": "IN_TRANSIT"
+        }
+    ]
+}
+```
 - **Response Status**: 200 OK
 
 
