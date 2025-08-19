@@ -62,4 +62,16 @@
 - **Type**: GET
 - **URL**: http://localhost:8080/api/users
 - **Request Name**: Get Timeline
+  ### 📤 Response Body (JSON)
+```json
+[
+    {
+        "id": 1,
+        "name": "Navy",
+        "email": "navy@gmail.com",
+        "phone": "5364783920",
+        "role": "ADMIN"
+    }
+]
+```
 - **Response Status**: 200 OK
