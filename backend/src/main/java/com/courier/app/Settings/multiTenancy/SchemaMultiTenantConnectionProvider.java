@@ -11,21 +11,17 @@ import java.sql.SQLException;
 public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectionProvider<Object> {
 
     private final DataSource dataSource;
-
     public SchemaMultiTenantConnectionProvider(DataSource dataSource) {
         this.dataSource = dataSource;
     }
-
     @Override
     public Connection getAnyConnection() throws SQLException {
         return dataSource.getConnection();
     }
-
     @Override
     public void releaseAnyConnection(Connection connection) throws SQLException {
         connection.close();
     }
-
     @Override
     public Connection getConnection(Object tenantIdentifier) throws SQLException {
         final Connection connection = getAnyConnection();
@@ -36,7 +32,6 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
         }
         return connection;
     }
-
     @Override
     public void releaseConnection(Object tenantIdentifier, Connection connection) throws SQLException {
         try {
@@ -50,12 +45,10 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
     public boolean supportsAggressiveRelease() {
         return false;
     }
-
     @Override
     public boolean isUnwrappableAs(Class<?> unwrapType) {
         return false;
     }
-
     @Override
     public <T> T unwrap(Class<T> unwrapType) {
         return null;
