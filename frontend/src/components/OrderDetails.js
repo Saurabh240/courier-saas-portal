@@ -1,19 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { ChevronLeft, MoreVertical, Edit, Mail } from 'lucide-react';
+import ActionMenu from "./ActionMenu";
+import { ChevronLeft } from "lucide-react";
 export default function OrderDetails({ order, onBack }) {
-  const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
-
-  const handleEdit = () => {
-    navigate(`/admin/orders/${order.id}/edit`);
-  };
-
-  const handleSendEmail = () => {
-    toast.info("📧 Sending email... (feature coming soon)");
-  };
-
   if (!order) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -125,78 +115,48 @@ export default function OrderDetails({ order, onBack }) {
           </div>
 
           {/* Admin Actions */}
-          <div className="relative">
-            <button
-              type="button"
-              className="flex items-center px-4 py-2 bg-gray-50 hover:bg-gray-300 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              onClick={() => setShowDropdown(!showDropdown)}
-            >
-              <MoreVertical className="w-4 h-4 mr-2" />
-              Admin Actions
-            </button>
-
-            {showDropdown && (
-              <>
-                {/* Backdrop */}
-                <div 
-                  className="fixed inset-0 z-10" 
-                  onClick={() => setShowDropdown(false)}
-                />
-                
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20 overflow-hidden">
-                  <div className="py-1">
-                    <button
-                      onClick={() => {
-                        handleEdit();
-                        setShowDropdown(false);
-                      }}
-                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
-                    >
-                      <Edit className="w-4 h-4 mr-3 text-gray-500" />
-                      Edit Order
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleSendEmail();
-                        setShowDropdown(false);
-                      }}
-                      className="flex items-center w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
-                    >
-                      <Mail className="w-4 h-4 mr-3 text-gray-500" />
-                      Send Email
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <ActionMenu
+            order={order}
+            options={{
+              viewDetails: false,
+              editOrder: true,
+              sendEmail: true,
+            }}
+          />
         </div>
 
         {/* Status Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-500 uppercase tracking-wide">
+            <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide">
               Invoice Status
             </label>
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getInvoiceStatusColor(order.invoiceStatus)}`}>
+            <div
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getInvoiceStatusColor(
+                order.invoiceStatus
+              )}`}
+            >
               {order.invoiceStatus || "N/A"}
             </div>
           </div>
 
           <div className="space-y-2 md:text-right">
-            <label className="block text-sm font-medium text-gray-500 uppercase tracking-wide">
+            <label className="block text-sm font-medium text-gray-700 uppercase tracking-wide">
               Order Status
             </label>
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(order.status)}`}>
+            <div
+              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(
+                order.status
+              )}`}
+            >
               {order.status || "Not Set"}
             </div>
           </div>
         </div>
-    </div>
+      </div>
 
-    {/* Content */}
-    <div className="p-6">
+      {/* Content */}
+      <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column */}
           <div className="space-y-6">

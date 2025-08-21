@@ -1,7 +1,7 @@
 import React from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Route, Routes, Navigate,Router } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import StaffDashboard from "./pages/staff/StaffDashboard";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
@@ -14,11 +14,14 @@ import PendingOrdersPage from "./pages/admin/PendingOrdersPage";
 import DeliveredOrdersPage from "./pages/admin/DeliveredOrdersPage";
 import CreateOrderPage from "./pages/admin/CreateOrderPage";
 import OrderDetailPage from "./pages/admin/OrderDetailPage";
+import EditOrderPage from "./pages/admin/EditOrderPage";
 // Protect routes based on role
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
   return user && user.role === role ? children : <Navigate to="/login" />;
 }
+
+
 
 // HomeRedirect component to show HomePage for non-logged users or redirect by role
 function HomeRedirect() {
@@ -50,6 +53,7 @@ function App() {
   return (
     
       <>
+      
     <Routes>
       <Route path="/" element={<HomeRedirect />} />
 
@@ -70,6 +74,7 @@ function App() {
       <Route path="/admin/orders/delivered" element={<DeliveredOrdersPage />} />
       <Route path="admin/orders/new" element={<CreateOrderPage />} />
       <Route path="/admin/orders/:id" element={<OrderDetailPage />} />
+      <Route path="/admin/orders/edit/:id" element={<EditOrderPage />} />
       <Route
         path="/staff"
         element={
