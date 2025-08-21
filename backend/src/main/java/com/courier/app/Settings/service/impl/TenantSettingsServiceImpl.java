@@ -11,8 +11,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.flywaydb.core.Flyway;
 import org.springframework.stereotype.Service;
-
+import javax.sql.DataSource;
 import java.time.ZoneId;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
     private final TenantSettingsRepository repository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final TenantDefaultProperties defaultProperties;
+    private final DataSource dataSource;
 
     @Override
     public TenantSettingsDTO getSettingsForCurrentTenant() {
@@ -104,9 +106,20 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
 
     @Transactional
     public void createTenant(String tenantId) {
-        // Create schema for this tenant
+
         entityManager.createNativeQuery("CREATE SCHEMA IF NOT EXISTS " + tenantId).executeUpdate();
-        // Create and save default settings
+
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db.migration/tenant")
+                .schemas(tenantId)
+                .defaultSchema(tenantId)
+                .createSchemas(true)
+                .baselineOnMigrate(false)
+                .load();
+
+        flyway.migrate();
+
         TenantSettings settings = new TenantSettings();
         settings.setTenantId(tenantId);
         settings.setBusinessHours(defaultProperties.getBusinessHours());
@@ -118,7 +131,6 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
 
         repository.save(settings);
     }
-
 
 }
 
