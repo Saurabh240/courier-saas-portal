@@ -1,10 +1,10 @@
-package com.courier.app.Settings.service.impl;
+package com.courier.app.settings.service.impl;
 
-import com.courier.app.Settings.config.TenantDefaultProperties;
-import com.courier.app.Settings.dto.TenantSettingsDTO;
-import com.courier.app.Settings.model.TenantSettings;
-import com.courier.app.Settings.repository.TenantSettingsRepository;
-import com.courier.app.Settings.service.TenantSettingsService;
+import com.courier.app.settings.config.TenantDefaultProperties;
+import com.courier.app.settings.dto.TenantSettingsDTO;
+import com.courier.app.settings.model.TenantSettings;
+import com.courier.app.settings.repository.TenantSettingsRepository;
+import com.courier.app.settings.service.TenantSettingsService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
@@ -13,9 +13,17 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -104,21 +112,45 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
         return "tenantId";
     }
 
-    @Transactional
-    public void createTenant(String tenantId) {
+    @Transactional(Transactional.TxType.NEVER)
+    public void createTenant(String tenantId) throws SQLException {
+        String schema = tenantSchema(tenantId);
 
-        entityManager.createNativeQuery("CREATE SCHEMA IF NOT EXISTS " + tenantId).executeUpdate();
+        // 2) Create schema using a separate AUTOCOMMIT connection, then close it.
+        try (Connection conn = dataSource.getConnection();
+             Statement st = conn.createStatement()) {
+            // hard timeouts so we never hang forever
+            st.execute("SET lock_timeout = '5s'; SET statement_timeout = '2min'");
+            // ensure autocommit so DDL becomes visible immediately
+            if (!conn.getAutoCommit()) conn.setAutoCommit(true);
+            st.execute("CREATE SCHEMA IF NOT EXISTS " + q(schema));
+        }
 
+        // 3) Now run Flyway WITHOUT any outer transaction; don't re-create schema.
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
-                .locations("classpath:db.migration/tenant")
-                .schemas(tenantId)
-                .defaultSchema(tenantId)
-                .createSchemas(true)
-                .baselineOnMigrate(false)
+                .locations("classpath:db/migration_tenant")
+                .schemas(schema)
+                .defaultSchema(schema)
+                .createSchemas(false)          // we already created it & committed
+                .baselineOnMigrate(false)      // let V1 run
+                .lockRetryCount(10)            // avoid rare lock races
+                .connectRetries(3)
                 .load();
 
+        Arrays.stream(flyway.info().pending())
+                .forEach(p -> System.out.println("Pending: " + p.getVersion() + " " + p.getDescription()));
+
         flyway.migrate();
+
+        // 4) Persist defaults in a SEPARATE transaction that targets the tenant schema
+        saveDefaultSettingsInTenantSchema(tenantId, schema);
+    }
+
+    /** Separate TX to write into the new tenant schema. */
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    protected void saveDefaultSettingsInTenantSchema(String tenantId, String schema) {
+        entityManager.createNativeQuery("SET search_path TO " + q(schema) + ", public").executeUpdate();
 
         TenantSettings settings = new TenantSettings();
         settings.setTenantId(tenantId);
@@ -132,5 +164,9 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
         repository.save(settings);
     }
 
+    private String tenantSchema(String slug) {
+        return "tenant_" + slug.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]", "_");
+    }
+    private String q(String ident) { return "\"" + ident.replace("\"", "\"\"") + "\""; }
 }
 

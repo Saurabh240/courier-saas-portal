@@ -1,6 +1,6 @@
-package com.courier.app.Settings.repository;
+package com.courier.app.settings.repository;
 
-import com.courier.app.Settings.model.TenantSettings;
+import com.courier.app.settings.model.TenantSettings;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

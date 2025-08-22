@@ -1,4 +1,4 @@
-package com.courier.app.Settings.multiTenancy;
+package com.courier.app.settings.multiTenancy;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
