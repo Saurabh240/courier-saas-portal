@@ -116,25 +116,23 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
     public void createTenant(String tenantId) throws SQLException {
         String schema = tenantSchema(tenantId);
 
-        // 2) Create schema using a separate AUTOCOMMIT connection, then close it.
+        // 1) Create schema in AUTOCOMMIT so DDL is visible immediately
         try (Connection conn = dataSource.getConnection();
              Statement st = conn.createStatement()) {
-            // hard timeouts so we never hang forever
-            st.execute("SET lock_timeout = '5s'; SET statement_timeout = '2min'");
-            // ensure autocommit so DDL becomes visible immediately
             if (!conn.getAutoCommit()) conn.setAutoCommit(true);
+            st.execute("SET lock_timeout = '5s'; SET statement_timeout = '2min'");
             st.execute("CREATE SCHEMA IF NOT EXISTS " + q(schema));
         }
 
-        // 3) Now run Flyway WITHOUT any outer transaction; don't re-create schema.
+        // 2) Run Flyway (no surrounding Spring TX)
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:db/migration_tenant")
                 .schemas(schema)
                 .defaultSchema(schema)
-                .createSchemas(false)          // we already created it & committed
-                .baselineOnMigrate(false)      // let V1 run
-                .lockRetryCount(10)            // avoid rare lock races
+                .createSchemas(false)           // we created it above
+                .baselineOnMigrate(false)
+                .lockRetryCount(10)
                 .connectRetries(3)
                 .load();
 
@@ -143,14 +141,24 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
 
         flyway.migrate();
 
-        // 4) Persist defaults in a SEPARATE transaction that targets the tenant schema
+        // 3) Save defaults inside a WRITE transaction and same connection
         saveDefaultSettingsInTenantSchema(tenantId, schema);
     }
 
-    /** Separate TX to write into the new tenant schema. */
+    /**
+     * IMPORTANT:
+     * - Must be a WRITE transaction (readOnly=false).
+     * - We set search_path on the SAME JDBC connection JPA uses,
+     *   by using Hibernate Session#doWork.
+     */
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     protected void saveDefaultSettingsInTenantSchema(String tenantId, String schema) {
-        entityManager.createNativeQuery("SET search_path TO " + q(schema) + ", public").executeUpdate();
+        // Set search_path on the JPA connection participating in THIS TX
+        entityManager.unwrap(org.hibernate.Session.class).doWork(conn -> {
+            try (Statement st = conn.createStatement()) {
+                st.execute("SET search_path TO " + q(schema) + ", public");
+            }
+        });
 
         TenantSettings settings = new TenantSettings();
         settings.setTenantId(tenantId);
