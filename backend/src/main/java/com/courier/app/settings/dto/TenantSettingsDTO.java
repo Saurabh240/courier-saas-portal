@@ -1,4 +1,4 @@
-package com.courier.app.Settings.dto;
+package com.courier.app.settings.dto;
 
 import lombok.Data;
 

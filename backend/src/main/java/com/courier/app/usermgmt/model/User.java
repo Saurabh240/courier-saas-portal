@@ -15,6 +15,7 @@ public class User {
     @Column(unique = true)
     private String email;
     private String password;
+    @Column(name = "phone_no")
     private String phoneNo;
     @Enumerated(EnumType.STRING)
     private Role role;
