@@ -19,12 +19,12 @@ public class User {
     private String phoneNo;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private Boolean verified;
+    private boolean verified;
 
     public User() {
     }
 
-    public User(String name, String email, String password, String phoneNo, Role role,Boolean verified) {
+    public User(String name, String email, String password, String phoneNo, Role role,boolean verified) {
         this.name = name;
         this.email = email;
         this.password = password;

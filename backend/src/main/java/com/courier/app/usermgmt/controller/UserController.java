@@ -44,7 +44,7 @@ public class UserController {
     @GetMapping
     public List<UserResponse> listAll(
             @RequestParam(required = false) String role,
-            @RequestParam(required = false) Boolean verified) {
+            @RequestParam(required = false) boolean verified) {
         return service.listUsers(role, verified);
     }
 }

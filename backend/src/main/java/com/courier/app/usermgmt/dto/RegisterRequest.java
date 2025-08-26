@@ -21,6 +21,5 @@ public class RegisterRequest {
     private String phoneNo;
     @NotNull
     private Role role;
-    private Boolean verified;
-
+    private boolean verified;
 }
