@@ -5,7 +5,7 @@
 ### ✅ Request Details
 
 - **Type**: POST
-- **URL**: http://localhost:8080/api/orders/api/orders
+- **URL**: http://localhost:8080/api/orders
 - **Request Name**: Create Order
 
 ### 📤 Request Body (JSON)
