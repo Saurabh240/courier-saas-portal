@@ -5,6 +5,8 @@ import com.courier.app.notification.model.NotificationEvent;
 import com.courier.app.notification.model.NotificationLog;
 import com.courier.app.notification.model.NotificationStatus;
 import com.courier.app.notification.repository.NotificationLogRepository;
+import com.courier.app.orders.model.Order;
+import com.courier.app.orders.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,23 +23,25 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationLogRepository notificationLogRepository;
     private final EmailService emailService;
     private final SmsHelper smsHelper;
-
+    private final OrderRepository orderRepository;
     @Override
     public void processNotification(NotificationEvent event) {
+
         // EMAIL
-        if (emailEnabled && event.getUser().getEmail() != null) {
+        if (emailEnabled && event.getUser().email() != null) {
             String subject = "Your order " + event.getOrderId() + " is now " + event.getStatus();
-            String name = event.getUser().getName() != null ? event.getUser().getName() : "User";
+            Order order = orderRepository.findById(event.getOrderId()).orElseThrow(()->new RuntimeException("user not found "));
+            String name =order.getReceiverName();
             String body = "Dear"+name+ ",\n\nYour order #" + event.getOrderId() +
                     " is now " + event.getStatus() + ".\n\nThank you,\nCourier App";
 
             boolean success = false;
             String error = null;
             try {
-                success = emailService.sendEmail(event.getUser().getEmail(), subject, body);
+                success = emailService.sendEmail(event.getUser().email(), subject, body);
             } catch (Exception ex) {
                 try {
-                    success = emailService.sendEmail(event.getUser().getEmail(), subject, body);
+                    success = emailService.sendEmail(event.getUser().email(), subject, body);
                 } catch (Exception retryEx) {
                     error = retryEx.getMessage();
                 }
@@ -53,7 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         // SMS
-        if (smsEnabled && event.getChannel() == Channel.SMS && event.getUser().getPhoneNo() != null) {
+        if (smsEnabled && event.getChannel() == Channel.SMS && event.getUser().phoneNo() != null) {
             String smsBody = "Courier Update: Order #" + event.getOrderId() + " is now " + event.getStatus() + ".";
 
             boolean success = false;
@@ -64,7 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
 
             while (attempts < maxRetries && !success) {
                 try {
-                    smsHelper.sendSms(event.getUser().getPhoneNo(), smsBody);
+                    smsHelper.sendSms(event.getUser().phoneNo(), smsBody);
                     success = true;
                 } catch (Exception ex) {
                     error = ex.getMessage(); // Capture latest error

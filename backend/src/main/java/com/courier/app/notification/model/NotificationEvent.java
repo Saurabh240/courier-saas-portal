@@ -13,9 +13,8 @@ public class NotificationEvent {
     private Long orderId;
     private Channel channel;
     private String type;
-    private User user;
+    private UserContactInfo user;
     private OrderStatus status;
-
 
 
 }

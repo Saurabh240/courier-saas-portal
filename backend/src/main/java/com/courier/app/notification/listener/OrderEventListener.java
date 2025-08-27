@@ -2,6 +2,7 @@ package com.courier.app.notification.listener;
 
 import com.courier.app.notification.model.Channel;
 import com.courier.app.notification.model.NotificationEvent;
+import com.courier.app.notification.model.UserContactInfo;
 import com.courier.app.notification.service.NotificationService;
 import com.courier.app.orders.events.OrderCreatedEvent;
 import com.courier.app.orders.events.OrderStatusUpdatedEvent;
@@ -35,10 +36,7 @@ public class OrderEventListener {
     }
 
     private void sendNotification(Order order, String type) {
-        User user = new User();
-                order.getCustomerEmail();
-                order.getDeliveryPhone();
-
+        UserContactInfo user = new UserContactInfo(order.getCustomerEmail(),order.getPickupPhone());
 
         if (emailEnabled) {
             NotificationEvent emailEvent = new NotificationEvent(
