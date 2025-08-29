@@ -36,13 +36,15 @@ public class UserController {
     public LoginResponse login(@RequestBody LoginRequest req) {
         User user = repo.findByEmail(req.email).orElseThrow();
         if (encoder.matches(req.password, user.getPassword())) {
-            return new LoginResponse(JwtUtil.generateToken(user.getEmail(), user.getRole().name()),user.getRole());
+            return new LoginResponse(JwtUtil.generateToken(user.getEmail(), user.getRole().name()), user.getRole());
         }
         throw new RuntimeException("Invalid credentials");
     }
 
     @GetMapping
-    public List<UserResponse> listAll() {
-        return service.listUsers();
+    public List<UserResponse> listAll(
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) boolean verified) {
+        return service.listUsers(role, verified);
     }
 }
