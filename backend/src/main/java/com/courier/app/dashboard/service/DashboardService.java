@@ -71,8 +71,9 @@ public class DashboardService {
                 order.getDeclaredValue(),
                 order.getDeliveryType(),
                 order.getStatus(),
-                order.getInvoiceStatus()
-
+                order.getInvoiceStatus(),
+                order.getPickupGeo(),
+                order.getDeliveryGeo()
         )).collect(Collectors.toList());
     }
 
