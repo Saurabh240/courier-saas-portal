@@ -1,4 +1,4 @@
-package com.courier.app.settings.multiTenancy;
+package com.courier.app.usermgmt.multiTenancy;
 
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.stereotype.Component;

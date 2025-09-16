@@ -1,7 +1,7 @@
-package com.courier.app.settings.config;
+package com.courier.app.usermgmt.config;
 
-import com.courier.app.settings.multiTenancy.SchemaMultiTenantConnectionProvider;
-import com.courier.app.settings.multiTenancy.TenantIdentifierResolver;
+import com.courier.app.usermgmt.multiTenancy.SchemaMultiTenantConnectionProvider;
+import com.courier.app.usermgmt.multiTenancy.TenantIdentifierResolver;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

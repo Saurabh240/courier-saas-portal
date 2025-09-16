@@ -1,4 +1,4 @@
-package com.courier.app.settings.multiTenancy;
+package com.courier.app.usermgmt.multiTenancy;
 
 public class TenantContext {
 

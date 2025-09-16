@@ -2,6 +2,8 @@ package com.courier.app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,7 +18,31 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /**
+     * Payment endpoints security chain
+     */
     @Bean
+    @Order(1) // higher priority, runs first
+    public SecurityFilterChain paymentSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher("/api/payments/**")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/payments/*/order").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/*/verify").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/*/webhook").permitAll()
+
+                )
+
+                .build();
+    }
+
+    /**
+     * Main app security chain
+     */
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -31,6 +57,9 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Shared CORS config
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -44,4 +73,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

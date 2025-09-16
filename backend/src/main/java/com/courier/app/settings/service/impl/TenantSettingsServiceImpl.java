@@ -1,6 +1,6 @@
 package com.courier.app.settings.service.impl;
 
-import com.courier.app.settings.config.TenantDefaultProperties;
+import com.courier.app.usermgmt.config.TenantDefaultProperties;
 import com.courier.app.settings.dto.TenantSettingsDTO;
 import com.courier.app.settings.model.TenantSettings;
 import com.courier.app.settings.repository.TenantSettingsRepository;
@@ -13,7 +13,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.flywaydb.core.Flyway;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -23,7 +22,6 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -144,7 +142,6 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
         // 3) Save defaults inside a WRITE transaction and same connection
         saveDefaultSettingsInTenantSchema(tenantId, schema);
     }
-
     /**
      * IMPORTANT:
      * - Must be a WRITE transaction (readOnly=false).
