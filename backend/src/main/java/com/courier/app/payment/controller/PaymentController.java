@@ -4,6 +4,7 @@ import com.courier.app.payment.model.*;
 import com.courier.app.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +14,7 @@ public class PaymentController {
 
     private final PaymentService service;
 
+    @PreAuthorize("hasAnyRole('CUSTOMER')")
     @PostMapping("/{provider}/order")
     public ResponseEntity<CreatePaymentOrderResponse> createOrder(
             @PathVariable PaymentProvider provider,
