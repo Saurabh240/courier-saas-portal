@@ -26,7 +26,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login", "/api/users/register",
                                 "/v3/api-docs/**",
-                                "/swagger-ui/**", "/api/payments/razorpay/webhook", "/api/payments/stripe/webhook").permitAll()
+                                "/swagger-ui/**",
+                                "/api/payments/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
