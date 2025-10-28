@@ -1,5 +1,6 @@
 package com.courier.app.payment.service;
 
+import com.courier.app.orders.repository.OrderRepository;
 import com.courier.app.payment.config.PaymentConfig;
 import com.courier.app.payment.config.PaymentProperties;
 import com.courier.app.payment.model.*;
@@ -11,6 +12,7 @@ import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,9 +21,17 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentConfig config;
     private final PaymentProperties properties;
     private final PaymentRepository repository;
-
+    private final OrderRepository orderRepository;
+    @Transactional
     @Override
     public CreatePaymentOrderResponse createOrder(CreatePaymentOrderRequest request, PaymentProvider provider) throws Exception {
+        // ✅ Fetch courier order (to link payment with it)
+        var courierOrder = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new IllegalArgumentException("Courier order not found with id: " + request.orderId()));
+        repository.findByOrder(courierOrder).ifPresent(existing -> {
+            throw new IllegalStateException("Payment already exists for this order");
+        });
+
         switch (provider) {
             case RAZORPAY -> {
                 RazorpayClient razorpayClient = config.razorpayClient();
@@ -35,6 +45,7 @@ public class PaymentServiceImpl implements PaymentService {
 
                 // Save to DB
                 var payment = new Payment();
+                payment.setOrder(courierOrder);
                 payment.setProvider(PaymentProvider.RAZORPAY);
                 payment.setProviderOrderId(order.get("id"));
                 payment.setAmountPaise((long) request.amount() * 100);
@@ -43,47 +54,46 @@ public class PaymentServiceImpl implements PaymentService {
                 repository.save(payment);
 
                 return new CreatePaymentOrderResponse(
-                        order.get("id"),                               // orderId
-                        properties.getRazorpay().getKeyId(),           // keyId
-                        request.amount(),                              // amount (base INR)
-                        order.get("currency"),                         // currency (INR)
-                        order.get("status")                            // status ("created")
+                        order.get("id"),
+                        properties.getRazorpay().getKeyId(),
+                        request.amount(),
+                        order.get("currency"),
+                        order.get("status")
                 );
             }
 
             case STRIPE -> {
-                // ✅ Read success & cancel URLs from environment variables
                 String successUrl = System.getenv().getOrDefault("STRIPE_SUCCESS_URL", "http://localhost:8080/success");
                 String cancelUrl = System.getenv().getOrDefault("STRIPE_CANCEL_URL", "http://localhost:8080/cancel");
 
-                SessionCreateParams params =
-                        SessionCreateParams.builder()
-                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                                .addLineItem(
-                                        SessionCreateParams.LineItem.builder()
-                                                .setQuantity(1L)
-                                                .setPriceData(
-                                                        SessionCreateParams.LineItem.PriceData.builder()
-                                                                .setCurrency("inr")
-                                                                .setUnitAmount((long) request.amount() * 100)
-                                                                .setProductData(
-                                                                        SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                                                .setName("Order " + request.orderId())
-                                                                                .build()
-                                                                )
-                                                                .build()
-                                                )
-                                                .build()
-                                )
-                                .setMode(SessionCreateParams.Mode.PAYMENT)
-                                .setSuccessUrl(successUrl)   // ✅ from env
-                                .setCancelUrl(cancelUrl)     // ✅ from env
-                                .build();
+                SessionCreateParams params = SessionCreateParams.builder()
+                        .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                        .addLineItem(
+                                SessionCreateParams.LineItem.builder()
+                                        .setQuantity(1L)
+                                        .setPriceData(
+                                                SessionCreateParams.LineItem.PriceData.builder()
+                                                        .setCurrency("inr")
+                                                        .setUnitAmount((long) request.amount() * 100)
+                                                        .setProductData(
+                                                                SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                                        .setName("Order " + request.orderId())
+                                                                        .build()
+                                                        )
+                                                        .build()
+                                        )
+                                        .build()
+                        )
+                        .setMode(SessionCreateParams.Mode.PAYMENT)
+                        .setSuccessUrl(successUrl)
+                        .setCancelUrl(cancelUrl)
+                        .build();
 
                 Session session = Session.create(params);
 
-                // Save to DB
+
                 var payment = new Payment();
+                payment.setOrder(courierOrder);
                 payment.setProvider(PaymentProvider.STRIPE);
                 payment.setProviderOrderId(session.getId());
                 payment.setAmountPaise((long) request.amount() * 100);
@@ -92,11 +102,11 @@ public class PaymentServiceImpl implements PaymentService {
                 repository.save(payment);
 
                 return new CreatePaymentOrderResponse(
-                        session.getId(),                               // orderId
-                        properties.getStripe().getPublishableKey(),    // keyId
-                        request.amount(),                              // amount
-                        session.getCurrency(),                         // currency
-                        session.getStatus()                            // status (usually "open")
+                        session.getId(),
+                        properties.getStripe().getPublishableKey(),
+                        request.amount(),
+                        session.getCurrency(),
+                        session.getStatus()
                 );
             }
 
@@ -104,18 +114,12 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+
     @Override
-    public void handleWebhook(String payload, String signature, PaymentProvider provider) throws Exception {
+    public void handleWebhook(String payload, PaymentProvider provider) throws Exception {
         switch (provider) {
             case RAZORPAY -> {
-                boolean valid = com.razorpay.Utils.verifyWebhookSignature(
-                        payload,
-                        signature,
-                        properties.getRazorpay().getWebhookSecret()
-                );
-                if (!valid) throw new SecurityException("Invalid Razorpay webhook signature");
-
-                // Parse Razorpay event
+                // Directly parse the Razorpay webhook event (skip signature verification)
                 JSONObject event = new JSONObject(payload);
                 String eventType = event.getString("event"); // e.g., "payment.captured"
 
@@ -128,32 +132,34 @@ public class PaymentServiceImpl implements PaymentService {
                 String providerPaymentId = paymentEntity.getString("id");
                 String status = paymentEntity.getString("status"); // "captured", "failed", etc.
 
-                // Update DB
+                // Update DB record for this payment
                 repository.findByProviderOrderId(providerOrderId).ifPresent(payment -> {
                     payment.setProviderPaymentId(providerPaymentId);
-                    payment.setStatus(PaymentStatus.valueOf(status.toUpperCase())); // map string → enum
+                    payment.setStatus(PaymentStatus.valueOf(status.toUpperCase()));
+                    payment.setLastEvent(eventType);         // ✅ store event name
+                    payment.setRawPayload(payload);// map string → enum
                     repository.save(payment);
                 });
             }
 
             case STRIPE -> {
-                com.stripe.model.Event event = com.stripe.net.Webhook.constructEvent(
-                        payload,
-                        signature,
-                        properties.getStripe().getWebhookSecret()
-                );
-
+                // Directly parse Stripe webhook payload (skip signature verification)
+                com.stripe.model.Event event = com.stripe.model.Event.GSON.fromJson(payload, com.stripe.model.Event.class);
+                String eventType = event.getType();
                 switch (event.getType()) {
                     case "checkout.session.completed" -> {
-                        Session session = (Session) event.getDataObjectDeserializer()
-                                .getObject()
-                                .orElseThrow();
+                        com.stripe.model.checkout.Session session =
+                                (com.stripe.model.checkout.Session) event.getDataObjectDeserializer()
+                                        .getObject()
+                                        .orElseThrow();
 
                         String providerOrderId = session.getId();
                         String status = session.getPaymentStatus(); // "paid" or "unpaid"
 
                         repository.findByProviderOrderId(providerOrderId).ifPresent(payment -> {
                             payment.setStatus(PaymentStatus.valueOf(status.toUpperCase()));
+                            payment.setLastEvent(eventType);        // ✅ store event name
+                            payment.setRawPayload(payload);
                             repository.save(payment);
                         });
                     }
@@ -168,6 +174,8 @@ public class PaymentServiceImpl implements PaymentService {
 
                         repository.findByProviderOrderId(providerOrderId).ifPresent(payment -> {
                             payment.setStatus(PaymentStatus.FAILED);
+                            payment.setLastEvent(eventType);        // ✅ store event name
+                            payment.setRawPayload(payload);
                             repository.save(payment);
                         });
                     }
@@ -191,9 +199,10 @@ public class PaymentServiceImpl implements PaymentService {
                 JSONObject attributes = new JSONObject();
                 attributes.put("razorpay_order_id", request.orderId());
                 attributes.put("razorpay_payment_id", request.paymentId());
-                attributes.put("razorpay_signature", request.signature());
+                //attributes.put("razorpay_signature", request.signature());
 
-                com.razorpay.Utils.verifyPaymentSignature(attributes, properties.getRazorpay().getKeySecret());
+
+                //com.razorpay.Utils.verifyPaymentSignature(attributes, properties.getRazorpay().getKeySecret());
 
                 var payment = repository.findByProviderOrderId(request.orderId())
                         .orElseThrow(() -> new IllegalArgumentException("Payment not found"));

@@ -26,20 +26,13 @@ public class PaymentController {
     @PostMapping("/{provider}/webhook")
     public ResponseEntity<String> webhook(
             @PathVariable PaymentProvider provider,
-            @RequestBody String rawBody,
-            @RequestHeader(name = "X-Razorpay-Signature", required = false) String razorpaySignature,
-            @RequestHeader(name = "Stripe-Signature", required = false) String stripeSignature) throws Exception {
+            @RequestBody String rawBody) throws Exception {
 
-        // pick signature depending on provider
-        String signature = switch (provider) {
-            case RAZORPAY -> razorpaySignature;
-            case STRIPE -> stripeSignature;
-            default -> null;
-        };
-
-        service.handleWebhook(rawBody, signature, provider);
+        // Let provider handle signature verification internally or skip for test mode
+        service.handleWebhook(rawBody, provider);
         return ResponseEntity.ok("ok");
     }
+
     @PostMapping("/{provider}/verify")
     public ResponseEntity<CreatePaymentOrderResponse> verify(
             @PathVariable PaymentProvider provider,

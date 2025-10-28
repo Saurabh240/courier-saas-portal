@@ -9,7 +9,7 @@ import com.courier.app.payment.model.VerifyPaymentRequest;
 public interface PaymentService {
     CreatePaymentOrderResponse createOrder(CreatePaymentOrderRequest request, PaymentProvider provider) throws Exception;
 
-    void handleWebhook(String payload, String signature, PaymentProvider provider) throws Exception;
+    void handleWebhook(String payload, PaymentProvider provider) throws Exception;
 
     CreatePaymentOrderResponse verifyPayment(VerifyPaymentRequest request, PaymentProvider provider) throws Exception;
 }
