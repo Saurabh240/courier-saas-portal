@@ -30,7 +30,7 @@ public class OrderController {
     public List<OrderResponse> all(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "25") int size,
-            @RequestParam(required= false) OrderStatus status
+            @RequestParam(required = false) OrderStatus status
     ) {
         return service.getAllOrders(page, size,status);
     }

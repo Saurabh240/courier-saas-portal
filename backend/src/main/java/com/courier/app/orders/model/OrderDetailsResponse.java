@@ -26,6 +26,8 @@ public record OrderDetailsResponse(
         InvoiceStatus invoiceStatus,
         String assignedPartnerEmail,
         LocalDateTime createdAt,
-        String deliveryProofPath
+        String deliveryProofPath,
+        GeoLocation pickupGeo,
+        GeoLocation delievryGeo
 ) {
 }

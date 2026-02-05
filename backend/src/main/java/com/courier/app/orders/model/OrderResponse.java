@@ -10,6 +10,8 @@ public record OrderResponse(
         double declaredValue,
         DeliveryType deliveryType,
         OrderStatus status,
-        InvoiceStatus invoiceStatus
+        InvoiceStatus invoiceStatus,
+        GeoLocation pickupGeo,
+        GeoLocation deliveryGeo
 ) {
 }

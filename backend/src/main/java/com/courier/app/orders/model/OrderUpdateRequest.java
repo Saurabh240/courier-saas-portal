@@ -14,5 +14,7 @@ public record OrderUpdateRequest(
         String pickupTimeWindow,
         String specialInstructions,
         Boolean isFragile,
-        DeliveryType deliveryType
+        DeliveryType deliveryType,
+        GeoLocation pickupGeo,
+        GeoLocation deliveryGeo
 ) {}

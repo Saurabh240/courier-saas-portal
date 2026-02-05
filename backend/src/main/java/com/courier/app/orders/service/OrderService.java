@@ -57,6 +57,8 @@ public class OrderService {
         order.setDeclaredValue(request.declaredValue());
         order.setFragile(request.isFragile());
         order.setDeliveryType(request.deliveryType());
+        order.setPickupGeo(request.pickupGeo());
+        order.setDeliveryGeo(request.deliveryGeo());
         Order savedOrder = repository.save(order);
         eventPublisher.publishEvent(new OrderCreatedEvent(savedOrder));
 
@@ -91,7 +93,8 @@ public class OrderService {
                     Optional.ofNullable(request.specialInstructions()).ifPresent(order::setSpecialInstructions);
                     Optional.ofNullable(request.isFragile()).ifPresent(order::setFragile);
                     Optional.ofNullable(request.deliveryType()).ifPresent(order::setDeliveryType);
-
+                    Optional.ofNullable(request.pickupGeo()).ifPresent(order::setPickupGeo);
+                    Optional.ofNullable(request.deliveryGeo()).ifPresent(order::setDeliveryGeo);
                     return repository.save(order);
                 })
                 .map(this::toDetailsResponse)
@@ -181,7 +184,9 @@ public class OrderService {
                 order.getInvoiceStatus(),
                 order.getAssignedPartnerEmail(),
                 order.getCreatedAt(),
-                order.getDeliveryProofPath()
+                order.getDeliveryProofPath(),
+                order.getPickupGeo(),
+                order.getDeliveryGeo()
         );
     }
 
@@ -197,7 +202,9 @@ public class OrderService {
                 order.getDeclaredValue(),
                 order.getDeliveryType(),
                 order.getStatus(),
-                order.getInvoiceStatus()
+                order.getInvoiceStatus(),
+                order.getPickupGeo(),
+                order.getDeliveryGeo()
         );
     }
 
@@ -228,7 +235,9 @@ public class OrderService {
                 order.getInvoiceStatus(),
                 order.getAssignedPartnerEmail(),
                 order.getCreatedAt(),
-                order.getDeliveryProofPath()
+                order.getDeliveryProofPath(),
+                order.getPickupGeo(),
+                order.getDeliveryGeo()
         );
     }
 }

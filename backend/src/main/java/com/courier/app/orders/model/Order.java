@@ -64,6 +64,26 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(name = "invoice_status")
     private InvoiceStatus invoiceStatus;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "lat", column = @Column(name = "pickup_lat")),
+            @AttributeOverride(name = "lng", column = @Column(name = "pickup_lng")),
+            @AttributeOverride(name = "city", column = @Column(name = "pickup_city")),
+            @AttributeOverride(name = "postalCode", column = @Column(name = "pickup_postal_code")),
+            @AttributeOverride(name = "formattedAddress", column = @Column(name = "pickup_formatted_address"))
+    }
+    )
+    private GeoLocation pickupGeo;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "lat", column = @Column(name = "delivery_lat")),
+            @AttributeOverride(name = "lng", column = @Column(name = "delivery_lng")),
+            @AttributeOverride(name = "city", column = @Column(name = "delivery_city")),
+            @AttributeOverride(name = "postalCode", column = @Column(name = "delivery_postal_code")),
+            @AttributeOverride(name = "formattedAddress", column = @Column(name = "delivery_formatted_address"))
+    }
+    )
+    private GeoLocation deliveryGeo;
 
     @PrePersist
     public void onCreate() {

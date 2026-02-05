@@ -1,6 +1,7 @@
 package com.courier.app.tracking.controller;
 
 import com.courier.app.tracking.dto.*;
+import com.courier.app.tracking.entity.LatestLocationTimelineResponse;
 import com.courier.app.tracking.service.TrackingService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,10 @@ public class TrackingController {
     @GetMapping("/{trackingId}/timeline")
     public ResponseEntity<LocationTimelineResponse> getTimeline(@PathVariable Long trackingId) {
         return ResponseEntity.ok(trackingService.getTimeline(trackingId));
+    }
+
+    @GetMapping("/{trackingId}/timeline/latest")
+    public ResponseEntity<LatestLocationTimelineResponse> getLatestTimeLine(@PathVariable Long trackingId){
+        return ResponseEntity.ok(trackingService.getCurrentTimeline(trackingId));
     }
 }
