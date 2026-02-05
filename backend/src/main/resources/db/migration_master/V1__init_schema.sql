@@ -1,10 +1,14 @@
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100),
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL,
-    verified BOOLEAN DEFAULT FALSE
+CREATE TABLE IF NOT EXISTS users (
+    id serial4 NOT NULL,
+    name varchar(100) NULL,
+    email varchar(100) NOT NULL,
+    password varchar(255) NOT NULL,
+    phone_no varchar(255) NULL,
+    role varchar(50) NOT NULL,
+    verified bool DEFAULT false NULL,
+    CONSTRAINT users_email_key UNIQUE (email),
+    CONSTRAINT users_pkey PRIMARY KEY (id)
 );
+
 
 -- Add more tables like refresh_token, delivery_agent etc. as needed

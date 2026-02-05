@@ -1,4 +1,4 @@
-package com.courier.app.settings.config;
+package com.courier.app.usermgmt.config;
 
 import lombok.*;
 
