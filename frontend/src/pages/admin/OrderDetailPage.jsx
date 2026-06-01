@@ -15,7 +15,7 @@ const OrderDetailPage = () => {
         const token = localStorage.getItem("token");
         const response = await axios.get(
           `${
-            process.env.REACT_APP_API_BASE_URL || "http://localhost:8080"
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
           }/api/orders/${id}`,
           {
             headers: {
