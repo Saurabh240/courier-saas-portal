@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import OrderTable from "../../components/OrderTable";
 import Layout from "../../components/Layout";
 
-const baseUrl = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-export default function PendingOrdersPage() {
+export default function DeliveredOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [filters, setFilters] = useState({
     id: "",
@@ -20,7 +20,7 @@ export default function PendingOrdersPage() {
   const navigate = useNavigate();
   const pageSize = 25;
 
-  // Fetch all pending orders once
+  // Fetch all delivered orders once
   useEffect(() => {
     const fetchOrders = async () => {
       setLoading(true);
@@ -28,25 +28,24 @@ export default function PendingOrdersPage() {
 
       try {
         const token = localStorage.getItem("token");
-        if (!token) throw new Error("No authentication token found. Please login again.");
+        if (!token)
+          throw new Error("No authentication token found. Please login again.");
 
-        const response = await fetch(
-          `${baseUrl}/api/orders?status=PENDING`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${baseUrl}/api/orders?status=DELIVERED`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (response.status === 401) {
           localStorage.removeItem("token");
           throw new Error("Session expired. Please login again.");
         }
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
         const orderList = Array.isArray(data) ? data : data.content || [];
@@ -64,20 +63,20 @@ export default function PendingOrdersPage() {
     fetchOrders();
   }, []);
 
-  //  frontend filtering
+  // frontend filtering
   useEffect(() => {
     const result = orders.filter((order) => {
-  const matchId =
-    !filters.id ||
-    String( order.orderId ?? "").toLowerCase().includes(filters.id.toLowerCase());
-
-  const matchSender =
-    !filters.sender ||
-    (order.senderName ?? "").toLowerCase().includes(filters.sender.toLowerCase());
-
-  const matchReceiver =
-    !filters.receiver ||
-    (order.receiverName ?? "").toLowerCase().includes(filters.receiver.toLowerCase());
+      const matchId =
+        !filters.id ||
+        order.id?.toString().toLowerCase().includes(filters.id.toLowerCase());
+      const matchSender =
+        !filters.sender ||
+        order.senderName?.toLowerCase().includes(filters.sender.toLowerCase());
+      const matchReceiver =
+        !filters.receiver ||
+        order.receiverName
+          ?.toLowerCase()
+          .includes(filters.receiver.toLowerCase());
       return matchId && matchSender && matchReceiver;
     });
 
@@ -87,7 +86,8 @@ export default function PendingOrdersPage() {
 
   const totalItems = filteredOrders.length;
   const startIndex = totalItems > 0 ? (currentPage - 1) * pageSize : 0;
-  const endIndex = totalItems > 0 ? Math.min(startIndex + pageSize, totalItems) : 0;
+  const endIndex =
+    totalItems > 0 ? Math.min(startIndex + pageSize, totalItems) : 0;
 
   const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
 
@@ -105,10 +105,14 @@ export default function PendingOrdersPage() {
     <Layout userType="admin">
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Pending Orders</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Delivered Orders</h2>
         </div>
 
-        {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">{error}</div>}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            {error}
+          </div>
+        )}
 
         <OrderTable
           orders={paginatedOrders}

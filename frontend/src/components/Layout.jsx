@@ -3,7 +3,7 @@ import SideBar from "./SideBar";
 
 const Layout = ({ userType, children }) => {
   useEffect(() => {
-    const siteTitle = process.env.REACT_APP_SITE_TITLE || "Courier Portal";
+   const siteTitle = import.meta.env.VITE_SITE_TITLE || "Courier Portal";
     document.title = siteTitle;
   }, []);
 
