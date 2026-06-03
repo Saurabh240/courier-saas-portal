@@ -54,7 +54,7 @@ export default function AdminDashboard() {
   const statusBreakdown = data?.statusBreakdown?.length ? data.statusBreakdown : MOCK_BREAKDOWN;
 
   return (
-    <Layout userType="ADMIN">
+    <Layout userType="admin">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Dashboard</h1>
