@@ -15,6 +15,7 @@ import DeliveredOrdersPage from "./pages/admin/DeliveredOrdersPage";
 import CreateOrderPage from "./pages/admin/CreateOrderPage";
 import OrderDetailPage from "./pages/admin/OrderDetailPage";
 import EditOrderPage from "./pages/admin/EditOrderPage";
+import CustomerOrdersPage from "./pages/customer/CustomerOrdersPage";
 // Protect routes based on role
 function PrivateRoute({ children, role }) {
   const { user } = useAuth();
@@ -99,6 +100,14 @@ function App() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/customer/orders"
+       element={
+       <PrivateRoute role="CUSTOMER">
+      <CustomerOrdersPage />
+       </PrivateRoute>
+        }
+         />
 
       {/* Catch-all fallback */}
       <Route path="*" element={<Navigate to="/" />} />
