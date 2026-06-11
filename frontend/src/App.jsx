@@ -4,6 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { Route, Routes, Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import StaffDashboard from "./pages/staff/StaffDashboard";
+import StaffPendingOrdersPage from "./pages/staff/StaffPendingOrdersPage";
+import StaffDeliveredOrdersPage from "./pages/staff/StaffDeliveredOrdersPage";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import SignUp from "./pages/SignUp";
@@ -84,10 +86,18 @@ function App() {
         }
       />
       <Route
-        path="/partner"
+        path="/staff/orders/pending"
         element={
-          <PrivateRoute role="DELIVERY_PARTNER">
-            <PartnerDashboard />
+          <PrivateRoute role="STAFF">
+            <StaffPendingOrdersPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/staff/orders/delivered"
+        element={
+          <PrivateRoute role="STAFF">
+            <StaffDeliveredOrdersPage />
           </PrivateRoute>
         }
       />
@@ -96,6 +106,15 @@ function App() {
         element={
           <PrivateRoute role="CUSTOMER">
             <CustomerDashboard />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/partner"
+        element={
+          <PrivateRoute role="DELIVERY_PARTNER">
+            <PartnerDashboard />
           </PrivateRoute>
         }
       />
