@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZoneId;
@@ -128,8 +129,9 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
                 .locations("classpath:db/migration_tenant")
                 .schemas(schema)
                 .defaultSchema(schema)
+                .table("flyway_tenant_schema_history")
                 .createSchemas(false)           // we created it above
-                .baselineOnMigrate(false)
+                .baselineOnMigrate(true)
                 .lockRetryCount(10)
                 .connectRetries(3)
                 .load();
@@ -139,9 +141,33 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
 
         flyway.migrate();
 
+        registerTenant(tenantId, schema);
+
         // 3) Save defaults inside a WRITE transaction and same connection
         saveDefaultSettingsInTenantSchema(tenantId, schema);
     }
+
+    private void registerTenant(String tenantId, String schema) throws SQLException {
+        try (Connection conn = dataSource.getConnection();
+             Statement st = conn.createStatement()) {
+            st.execute("SET SCHEMA 'public'");
+            try (PreparedStatement ps = conn.prepareStatement("""
+                    INSERT INTO tenant_registry (tenant_id, schema_name, display_name, active)
+                    VALUES (?, ?, ?, TRUE)
+                    ON CONFLICT (tenant_id) DO UPDATE
+                    SET schema_name = EXCLUDED.schema_name,
+                        display_name = EXCLUDED.display_name,
+                        active = EXCLUDED.active,
+                        updated_at = CURRENT_TIMESTAMP
+                    """)) {
+                ps.setString(1, tenantId);
+                ps.setString(2, schema);
+                ps.setString(3, tenantId);
+                ps.executeUpdate();
+            }
+        }
+    }
+
     /**
      * IMPORTANT:
      * - Must be a WRITE transaction (readOnly=false).
@@ -150,7 +176,6 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
      */
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     protected void saveDefaultSettingsInTenantSchema(String tenantId, String schema) {
-        // Set search_path on the JPA connection participating in THIS TX
         entityManager.unwrap(org.hibernate.Session.class).doWork(conn -> {
             try (Statement st = conn.createStatement()) {
                 st.execute("SET search_path TO " + q(schema) + ", public");
@@ -174,4 +199,3 @@ public class TenantSettingsServiceImpl implements TenantSettingsService {
     }
     private String q(String ident) { return "\"" + ident.replace("\"", "\"\"") + "\""; }
 }
-

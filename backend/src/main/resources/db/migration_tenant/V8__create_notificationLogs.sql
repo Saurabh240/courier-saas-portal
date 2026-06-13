@@ -1,11 +1,12 @@
 CREATE TABLE IF NOT EXISTS notification_logs (
-	id bigserial NOT NULL,
-	attempted_at timestamptz(6) NULL,
-	channel varchar(255) NULL,
-	error_message text NULL,
-	order_id int8 NULL,
-	status varchar(255) NULL,
-	CONSTRAINT notification_logs_channel_check CHECK (((channel)::text = ANY ((ARRAY['EMAIL'::character varying, 'SMS'::character varying])::text[]))),
-	CONSTRAINT notification_logs_pkey PRIMARY KEY (id),
-	CONSTRAINT notification_logs_status_check CHECK (((status)::text = ANY ((ARRAY['SENT'::character varying, 'FAILED'::character varying])::text[])))
+    id BIGSERIAL PRIMARY KEY,
+    order_id BIGINT,
+    channel VARCHAR(255),
+    status VARCHAR(255),
+    attempted_at TIMESTAMPTZ(6),
+    error_message TEXT,
+    CONSTRAINT notification_logs_channel_check CHECK (channel IS NULL OR channel IN ('EMAIL', 'SMS')),
+    CONSTRAINT notification_logs_status_check CHECK (status IS NULL OR status IN ('SENT', 'FAILED'))
 );
+
+CREATE INDEX IF NOT EXISTS idx_notification_logs_order_id ON notification_logs(order_id);

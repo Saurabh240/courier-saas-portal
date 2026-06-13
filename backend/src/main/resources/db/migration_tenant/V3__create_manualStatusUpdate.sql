@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS manual_status_updates (
-	id bigserial NOT NULL,
-	"comment" varchar(255) NULL,
-	order_id int8 NULL,
-	status varchar(255) NULL,
-	"timestamp" timestamp(6) NULL,
-	updated_by varchar(255) NULL,
-	CONSTRAINT manual_status_updates_pkey PRIMARY KEY (id),
-	CONSTRAINT manual_status_updates_status_check CHECK (((status)::text = ANY ((ARRAY['CREATED'::character varying, 'PICKED_UP'::character varying, 'IN_TRANSIT'::character varying, 'DELIVERED'::character varying, 'CANCELLED'::character varying])::text[])))
+    id BIGSERIAL PRIMARY KEY,
+    order_id BIGINT,
+    status VARCHAR(255),
+    comment VARCHAR(255),
+    updated_by VARCHAR(255),
+    timestamp TIMESTAMP(6),
+    CONSTRAINT manual_status_updates_status_check CHECK (status IS NULL OR status IN ('PENDING', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'))
 );
+
+CREATE INDEX IF NOT EXISTS idx_manual_status_updates_order_id ON manual_status_updates(order_id);

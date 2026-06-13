@@ -1,13 +1,12 @@
 CREATE TABLE IF NOT EXISTS tenant_settings (
-	id uuid NOT NULL,
-	brand_name varchar(255) NULL,
-	business_hours text NULL,
-	created_at timestamptz(6) NULL,
-	logo_url varchar(255) NULL,
-	primary_color varchar(255) NULL,
-	secondary_color varchar(255) NULL,
-	tenant_id varchar(255) NOT NULL,
-	timezone varchar(255) NULL,
-	updated_at timestamptz(6) NULL,
-	CONSTRAINT tenant_settings_pkey PRIMARY KEY (id)
+    id UUID PRIMARY KEY,
+    tenant_id VARCHAR(255) NOT NULL UNIQUE,
+    business_hours TEXT,
+    brand_name VARCHAR(255),
+    logo_url VARCHAR(255),
+    primary_color VARCHAR(255),
+    secondary_color VARCHAR(255),
+    timezone VARCHAR(255),
+    created_at TIMESTAMPTZ(6),
+    updated_at TIMESTAMPTZ(6)
 );

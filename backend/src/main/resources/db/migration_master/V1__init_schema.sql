@@ -1,14 +1,11 @@
-CREATE TABLE IF NOT EXISTS users (
-    id serial4 NOT NULL,
-    name varchar(100) NULL,
-    email varchar(100) NOT NULL,
-    password varchar(255) NOT NULL,
-    phone_no varchar(255) NULL,
-    role varchar(50) NOT NULL,
-    verified bool DEFAULT false NULL,
-    CONSTRAINT users_email_key UNIQUE (email),
-    CONSTRAINT users_pkey PRIMARY KEY (id)
+CREATE SCHEMA IF NOT EXISTS public;
+
+CREATE TABLE IF NOT EXISTS tenant_registry (
+    id BIGSERIAL PRIMARY KEY,
+    tenant_id VARCHAR(255) NOT NULL UNIQUE,
+    schema_name VARCHAR(255) NOT NULL UNIQUE,
+    display_name VARCHAR(255),
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-
--- Add more tables like refresh_token, delivery_agent etc. as needed
