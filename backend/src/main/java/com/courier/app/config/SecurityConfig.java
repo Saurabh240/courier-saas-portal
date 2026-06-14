@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/login", "/api/users/register",
+                                "/api/users/forgot-password", "/api/users/reset-password",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/api/payments/RAZORPAY/webhook","/api/payments/RAZORPAY/verify").permitAll()
