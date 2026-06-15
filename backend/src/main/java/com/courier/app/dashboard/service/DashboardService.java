@@ -1,51 +1,145 @@
 package com.courier.app.dashboard.service;
 
-import com.courier.app.orders.model.OrderResponse;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
+import com.courier.app.dashboard.model.DailyOrderCount;
 import com.courier.app.dashboard.model.DashboardSummary;
+import com.courier.app.dashboard.model.StatusBreakdown;
+import com.courier.app.dashboard.repository.DashboardRepository;
+import com.courier.app.payment.model.PaymentStatus;
+import com.courier.app.payment.repository.PaymentRepository;
 import com.courier.app.orders.model.Order;
+import com.courier.app.orders.model.OrderResponse;
 import com.courier.app.orders.model.OrderStatus;
 import com.courier.app.orders.repository.OrderRepository;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class DashboardService {
 
-    @Autowired
-    private OrderRepository orderRepository;
+    private static final int WEEKLY_CHART_DAYS = 7;
 
-    public DashboardSummary getSummary() {
-        LocalDate start = LocalDate.now().minusDays(30);
-        LocalDate end = LocalDate.now();
-        List<Order> orders = orderRepository.findAll().stream()
-                .filter(o -> !o.getCreatedAt().isBefore(start.atStartOfDay()) &&
-                        o.getCreatedAt().isBefore(end.plusDays(1).atStartOfDay()))
-                .collect(Collectors.toList());
-        long total = orders.size();
-        long delivered = orders.stream().filter(o -> o.getStatus() == OrderStatus.DELIVERED).count();
-        long inTransit = orders.stream().filter(o -> o.getStatus() == OrderStatus.IN_TRANSIT).count();
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        long createdToday = orders.stream()
-                .filter(o -> o.getCreatedAt().isAfter(startOfDay))
-                .count();
-        Map<OrderStatus, Long> statusCountMap = new EnumMap<>(OrderStatus.class);
+    private final OrderRepository orderRepository;
+    private final DashboardRepository dashboardRepository;
+    private final PaymentRepository paymentRepository;
+
+    /**
+     * Builds the full dashboard summary for the currently resolved tenant:
+     * order counts by status, this month's revenue, delivery success rate,
+     * a 7-day order count series and a status breakdown for the pie chart.
+     */
+    public DashboardSummary getDashboardSummary() {
+
+        // --- Status counts -------------------------------------------------
+        Map<OrderStatus, Long> statusCounts = new EnumMap<>(OrderStatus.class);
         for (OrderStatus status : OrderStatus.values()) {
-            long count = orders.stream().filter(o -> o.getStatus() == status).count();
-            statusCountMap.put(status, count);
+            statusCounts.put(status, 0L);
         }
-        return new DashboardSummary(total, delivered, inTransit, createdToday, statusCountMap);
+        for (Object[] row : dashboardRepository.countOrdersGroupedByStatus()) {
+            OrderStatus status = (OrderStatus) row[0];
+            Long count = (Long) row[1];
+            statusCounts.put(status, count);
+        }
+
+        long totalOrders = dashboardRepository.countAllOrders();
+        long pendingOrders = statusCounts.getOrDefault(OrderStatus.PENDING, 0L);
+        long inTransitOrders = statusCounts.getOrDefault(OrderStatus.IN_TRANSIT, 0L);
+        long deliveredOrders = statusCounts.getOrDefault(OrderStatus.DELIVERED, 0L);
+        long cancelledOrders = statusCounts.getOrDefault(OrderStatus.CANCELLED, 0L);
+
+        // --- Delivery success rate -----------------------------------------
+        double deliverySuccessRate = totalOrders == 0
+                ? 0.0
+                : round2((deliveredOrders * 100.0) / totalOrders);
+
+        // --- Revenue for the current calendar month -------------------------
+        ZoneId zone = ZoneId.systemDefault();
+        LocalDate today = LocalDate.now();
+        Instant startOfMonth = today.withDayOfMonth(1).atStartOfDay(zone).toInstant();
+        Instant startOfNextMonth = today.withDayOfMonth(1).plusMonths(1).atStartOfDay(zone).toInstant();
+
+        Long revenuePaise = paymentRepository.sumAmountPaiseByStatusAndCreatedAtBetween(
+                PaymentStatus.CAPTURED, startOfMonth, startOfNextMonth);
+        BigDecimal revenueThisMonth = BigDecimal.valueOf(revenuePaise == null ? 0L : revenuePaise)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        // --- Weekly order counts (last 7 days, oldest first) ---------------
+        LocalDate firstDay = today.minusDays(WEEKLY_CHART_DAYS - 1L);
+        LocalDateTime since = firstDay.atStartOfDay();
+
+        Map<LocalDate, Long> countsByDay = new HashMap<>();
+        for (Object[] row : dashboardRepository.countOrdersByDaySince(since)) {
+            LocalDate day = toLocalDate(row[0]);
+            Long count = (Long) row[1];
+            countsByDay.put(day, count);
+        }
+
+        List<DailyOrderCount> weeklyOrderCounts = new ArrayList<>(WEEKLY_CHART_DAYS);
+        for (int i = 0; i < WEEKLY_CHART_DAYS; i++) {
+            LocalDate day = firstDay.plusDays(i);
+            weeklyOrderCounts.add(new DailyOrderCount(day, countsByDay.getOrDefault(day, 0L)));
+        }
+
+        // --- Status breakdown (counts + % share) for the pie chart ----------
+        Map<OrderStatus, StatusBreakdown> statusBreakdown = new EnumMap<>(OrderStatus.class);
+        for (OrderStatus status : OrderStatus.values()) {
+            long count = statusCounts.getOrDefault(status, 0L);
+            double percentage = totalOrders == 0 ? 0.0 : round2((count * 100.0) / totalOrders);
+            statusBreakdown.put(status, new StatusBreakdown(count, percentage));
+        }
+
+        return new DashboardSummary(
+                totalOrders,
+                pendingOrders,
+                inTransitOrders,
+                deliveredOrders,
+                cancelledOrders,
+                revenueThisMonth,
+                deliverySuccessRate,
+                weeklyOrderCounts,
+                statusBreakdown
+        );
+    }
+
+    private double round2(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
+
+    /**
+     * The JPQL projection {@code CAST(o.createdAt AS date)} can be returned as either
+     * {@link java.sql.Date} or {@link LocalDate} depending on the Hibernate/dialect
+     * version, so handle both.
+     */
+    private LocalDate toLocalDate(Object value) {
+        if (value instanceof LocalDate localDate) {
+            return localDate;
+        }
+        if (value instanceof Date sqlDate) {
+            return sqlDate.toLocalDate();
+        }
+        if (value instanceof java.util.Date utilDate) {
+            return utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+        throw new IllegalStateException("Unexpected date type returned from query: " + value.getClass());
     }
 
     public List<OrderResponse> CreatedAtBetween(LocalDate start, LocalDate end) {
