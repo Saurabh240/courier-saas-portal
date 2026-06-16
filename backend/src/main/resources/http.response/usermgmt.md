@@ -75,3 +75,37 @@
 ]
 ```
 - **Response Status**: 200 OK
+
+
+## 🔄 Endpoint: Forgot Password
+
+### ✅ Request Details
+
+- **Type**: POST
+- **URL**: http://localhost:8080/api/users/forgot-password
+- **Request Name**: forgot Password
+
+### 📤 Request Body (JSON)
+```json
+{
+  "email":"navy@gmail.com"
+}
+```
+- **Response Status**: 200 OK
+
+## 🔄 Endpoint: Reset Password
+
+### ✅ Request Details
+
+- **Type**: POST
+- **URL**: http://localhost:8080/api/users/reset-password
+- **Request Name**: reset Password
+
+### 📤 Request Body (JSON)
+```json
+{
+  "token": "6f8ce3b2-973d-4e15-8ae9-556a7c4062e6",
+  "newPassword":"A123456@"
+}
+```
+- **Response Status**: 200 OK

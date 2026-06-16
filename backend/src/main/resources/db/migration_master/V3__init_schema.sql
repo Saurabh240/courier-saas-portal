@@ -1,5 +1,7 @@
-ALTER TABLE public.orders DROP CONSTRAINT orders_status_check;
-UPDATE orders
-SET status = 'PENDING'
-WHERE status = 'CREATED';
-ALTER TABLE public.orders ADD CONSTRAINT orders_status_check CHECK (((status)::text = ANY ((ARRAY['PENDING'::character varying, 'PICKED_UP'::character varying, 'IN_TRANSIT'::character varying, 'DELIVERED'::character varying, 'CANCELLED'::character varying])::text[])));
+INSERT INTO tenant_registry (tenant_id, schema_name, display_name, active)
+VALUES ('test', 'test', 'Default Test Tenant', TRUE)
+ON CONFLICT (tenant_id) DO UPDATE
+SET schema_name = EXCLUDED.schema_name,
+    display_name = EXCLUDED.display_name,
+    active = EXCLUDED.active,
+    updated_at = CURRENT_TIMESTAMP;
