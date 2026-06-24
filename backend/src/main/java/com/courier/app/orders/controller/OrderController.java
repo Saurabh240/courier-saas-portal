@@ -2,18 +2,23 @@ package com.courier.app.orders.controller;
 
 import com.courier.app.orders.model.*;
 import com.courier.app.orders.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
+@Tag(name = "Orders", description = "Order creation, listing and lifecycle management")
+@SecurityRequirement(name = "bearerAuth")
 public class OrderController {
 
     @Autowired
@@ -41,17 +46,72 @@ public class OrderController {
         return service.updateOrder(id, request);
     }
 
+    /**
+     * All tenant orders, optionally filtered by status. STAFF role only.
+     * Page is 0-based (page=0 is the first page).
+     */
+    @GetMapping("/staff")
+    @PreAuthorize("hasRole('STAFF')")
+    @Operation(
+            summary = "List orders for staff",
+            description = "Returns all orders for the current tenant, optionally filtered by status. "
+                    + "Supports pagination via page (0-based) and size. STAFF role only."
+    )
 
-    @GetMapping("/customer")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public List<OrderResponse> forCustomer(@RequestParam String email) {
-        return service.getOrdersForCustomer(email);
+    public PagedOrderResponse forStaff(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) OrderStatus status
+    ) {
+        return service.getOrdersForStaff(page, size, status);
     }
 
+    /**
+     * Orders assigned to the authenticated delivery partner, optionally filtered by status.
+     * The partner's identity is taken from the authenticated JWT (not a client-supplied param),
+     * so a partner cannot view another partner's orders.
+     */
     @GetMapping("/partner")
     @PreAuthorize("hasRole('DELIVERY_PARTNER')")
-    public List<OrderResponse> forPartner(@RequestParam String email) {
-        return service.getOrdersForPartner(email);
+    @Operation(
+            summary = "List orders for the authenticated delivery partner",
+            description = "Returns orders assigned to the authenticated delivery partner, optionally "
+                    + "filtered by status. Supports pagination via page (0-based) and size. "
+                    + "DELIVERY_PARTNER role only; the partner identity is derived from the JWT."
+    )
+
+    public PagedOrderResponse forPartner(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) OrderStatus status,
+            Authentication authentication
+    ) {
+        String partnerEmail = authentication.getName();
+        return service.getOrdersForPartnerPaged(page, size, status, partnerEmail);
+    }
+
+    /**
+     * Orders belonging to the authenticated customer, optionally filtered by status.
+     * The customer's identity is taken from the authenticated JWT (not a client-supplied param),
+     * so a customer cannot view another customer's orders.
+     */
+    @GetMapping("/customer")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @Operation(
+            summary = "List orders for the authenticated customer",
+            description = "Returns orders belonging to the authenticated customer, optionally filtered "
+                    + "by status. Supports pagination via page (0-based) and size. "
+                    + "CUSTOMER role only; the customer identity is derived from the JWT."
+    )
+
+    public PagedOrderResponse forCustomer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) OrderStatus status,
+            Authentication authentication
+    ) {
+        String customerEmail = authentication.getName();
+        return service.getOrdersForCustomerPaged(page, size, status, customerEmail);
     }
 
     @PutMapping("/{id}/assign")
