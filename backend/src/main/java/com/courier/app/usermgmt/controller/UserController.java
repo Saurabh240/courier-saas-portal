@@ -1,14 +1,17 @@
 package com.courier.app.usermgmt.controller;
 
 import com.courier.app.config.JwtUtil;
+import com.courier.app.usermgmt.dto.ForgotPasswordRequest;
 import com.courier.app.usermgmt.dto.LoginRequest;
 import com.courier.app.usermgmt.dto.LoginResponse;
 import com.courier.app.usermgmt.dto.RegisterRequest;
+import com.courier.app.usermgmt.dto.ResetPasswordRequest;
 import com.courier.app.usermgmt.dto.UserResponse;
 import com.courier.app.usermgmt.model.User;
 import com.courier.app.usermgmt.repository.UserRepository;
 import com.courier.app.usermgmt.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,5 +49,17 @@ public class UserController {
             @RequestParam(required = false) String role,
             @RequestParam(required = false) boolean verified) {
         return service.listUsers(role, verified);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+        service.forgotPassword(req.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+        service.resetPassword(req.getToken(), req.getNewPassword());
+        return ResponseEntity.ok().build();
     }
 }
