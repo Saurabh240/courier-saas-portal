@@ -3,13 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Layout from '../../components/Layout';
 
-// Status colors directly from the design image
 const STATUS_STYLING = {
   PENDING: 'bg-amber-50 text-amber-600 border-amber-200',
   'PICKED UP': 'bg-blue-50 text-blue-600 border-blue-200',
   IN_TRANSIT: 'bg-indigo-50 text-indigo-600 border-indigo-200',
   DELIVERED: 'bg-emerald-50 text-emerald-600 border-emerald-200',
   CANCELLED: 'bg-rose-50 text-rose-600 border-rose-200'
+};
+
+
+const getEmailFromToken = (token) => {
+  try {
+    if (!token) return '';
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload).sub || JSON.parse(jsonPayload).email || '';
+  } catch (e) {
+    return '';
+  }
 };
 
 export default function CustomerOrdersPage() {
@@ -29,38 +46,48 @@ export default function CustomerOrdersPage() {
     const fetchOrders = async () => {
       setLoading(true);
       const token = localStorage.getItem('token');
+      const userEmail = getEmailFromToken(token);
+
       try {
-        const response = await axios.get(`/api/orders/customer?page=${page}&limit=10`, {
+    
+        const response = await axios.get(`/api/orders/customer?page=${page}&limit=10&email=${encodeURIComponent(userEmail)}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        const data = response.data?.orders || (Array.isArray(response.data) ? response.data : []);
+        let data = [];
+        let pagesCalculated = 1;
+
+        if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
+          data = response.data.content || response.data.orders || [];
+          pagesCalculated = response.data.totalPages || 1;
+        } else {
+          data = Array.isArray(response.data) ? response.data : [];
+        }
+
         setOrders(data);
-        setFilteredOrders(data);
-        setTotalPages(response.data?.totalPages || 1);
+        
+     
+        if (activeTab === 'All') {
+          setFilteredOrders(data);
+        } else if (activeTab === 'Active') {
+          setFilteredOrders(data.filter(o => o.status !== 'DELIVERED' && o.status !== 'CANCELLED'));
+        } else {
+          setFilteredOrders(data.filter(o => o.status?.toUpperCase() === activeTab.toUpperCase()));
+        }
+
+        setTotalPages(pagesCalculated);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load your orders.');
-        
-        // --- PRODUCTION DESIGN DUMMY FALLBACK MODE ---
-        // Keeps the layout working if the backend API returns empty
-        const mockData = [
-          { id: 'ORD-2024-08472', createdAt: '2024-05-26', from: 'Delhi', to: 'Mumbai', packageDetails: 'Parcel · 2.5kg', status: 'IN_TRANSIT' },
-          { id: 'ORD-2024-08463', createdAt: '2024-05-27', from: 'Delhi', to: 'Chennai', packageDetails: 'Document · 0.8kg', status: 'PENDING' },
-          { id: 'ORD-2024-08471', createdAt: '2024-05-24', from: 'Bangalore', to: 'Kolkata', packageDetails: 'Document · 0.5kg', status: 'DELIVERED' },
-          { id: 'ORD-2024-08470', createdAt: '2024-05-27', from: 'Chennai', to: 'Hyderabad', packageDetails: 'Fragile · 1.2kg', status: 'PENDING' },
-          { id: 'ORD-2024-08469', createdAt: '2024-05-25', from: 'Jaipur', to: 'Kolkata', packageDetails: 'Oversized · 15kg', status: 'PICKED UP' },
-          { id: 'ORD-2024-08468', createdAt: '2024-05-23', from: 'Chandigarh', to: 'Mumbai', packageDetails: 'Document · 0.3kg', status: 'CANCELLED' }
-        ];
-        setOrders(mockData);
-        setFilteredOrders(mockData);
+        setOrders([]);
+        setFilteredOrders([]);
         setTotalPages(1);
       } finally {
         setLoading(false);
       }
     };
     fetchOrders();
-  }, [page]);
+  }, [page, activeTab]);
 
   // Tab Filtering logic
   const handleTabChange = (tabName) => {
@@ -110,6 +137,10 @@ export default function CustomerOrdersPage() {
               {[1, 2, 3, 4].map((i) => <div key={i} className="h-12 bg-slate-100 rounded" />)}
             </div>
           </div>
+        ) : error ? (
+          <div className="p-5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold">
+            {error}
+          </div>
         ) : filteredOrders.length === 0 ? (
           /* Empty State Section */
           <div className="bg-white border border-slate-100 rounded-2xl p-16 text-center max-w-xl mx-auto my-12 shadow-sm">
@@ -124,7 +155,7 @@ export default function CustomerOrdersPage() {
             </button>
           </div>
         ) : (
-          /* Clean Figma Ordered Table View */
+          /*  Ordered Table View */
           <div className="bg-white rounded-2xl border border-slate-150/80 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -140,41 +171,55 @@ export default function CustomerOrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-[13px] text-slate-700 font-bold">
-                  {filteredOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-slate-50/40 transition-colors">
-                      <td className="p-4 pl-6 font-bold text-slate-900 tracking-tight">{order.id}</td>
-                      <td className="p-4 text-slate-400 font-medium">
-                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric', month: 'short', year: 'numeric'
-                        }) : 'N/A'}
-                      </td>
-                      <td className="p-4 text-slate-500 font-medium">{order.from}</td>
-                      <td className="p-4 text-slate-500 font-medium">{order.to}</td>
-                      <td className="p-4 text-slate-400 font-medium">{order.packageDetails}</td>
-                      <td className="p-4">
-                        <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold tracking-wide uppercase border ${STATUS_STYLING[order.status?.toUpperCase()] || 'bg-slate-50 text-slate-500'}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="p-4 pr-6">
-                        {order.status === 'DELIVERED' ? (
-                          <button
-                            onClick={() => navigate(`/customer/invoice/${order.id}`)}
-                            className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 transition font-bold"
-                          >
-                            📥 <span className="underline decoration-indigo-200">Invoice</span>
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => navigate(`/customer/track?orderId=${order.id}`)}
-                            className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 transition font-bold"
-                          >
-                            📦 <span className="underline decoration-blue-200">Track</span>
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredOrders.map((order) => {
+                    const pickupLocation = order.pickupAddress || order.from || 'N/A';
+                    const dropLocation = order.deliveryAddress || order.to || 'N/A';
+                    const itemDetails = order.packageDetails || order.packageType || 'Parcel';
+
+                    return (
+                      <tr key={order.id} className="hover:bg-slate-50/40 transition-colors">
+                        <td className="p-4 pl-6 font-bold text-slate-900 tracking-tight">
+                          {order.orderId || `ORD-${order.id}`}
+                        </td>
+                        <td className="p-4 text-slate-400 font-medium">
+                          {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB', {
+                            day: 'numeric', month: 'short', year: 'numeric'
+                          }) : 'N/A'}
+                        </td>
+                        <td className="p-4 text-slate-500 font-medium max-w-[180px] truncate" title={pickupLocation}>
+                          {pickupLocation}
+                        </td>
+                        <td className="p-4 text-slate-500 font-medium max-w-[180px] truncate" title={dropLocation}>
+                          {dropLocation}
+                        </td>
+                        <td className="p-4 text-slate-400 font-medium max-w-[150px] truncate" title={itemDetails}>
+                          {itemDetails}
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold tracking-wide uppercase border ${STATUS_STYLING[order.status?.toUpperCase()] || 'bg-slate-50 text-slate-500'}`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="p-4 pr-6">
+                          {order.status === 'DELIVERED' ? (
+                            <button
+                              onClick={() => navigate(`/customer/invoice/${order.orderId || order.id}`)}
+                              className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 transition font-bold"
+                            >
+                              📥 <span className="underline decoration-indigo-200">Invoice</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => navigate(`/customer/track?orderId=${order.orderId || order.id}`)}
+                              className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 transition font-bold"
+                            >
+                              📦 <span className="underline decoration-blue-200">Track</span>
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
