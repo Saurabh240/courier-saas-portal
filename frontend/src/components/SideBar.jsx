@@ -93,6 +93,14 @@ const SideBar = ({ userType }) => {
         icon: <LayoutDashboard size={18} />,
       },
       {
+        label: "Orders",
+        icon: <ShoppingCart size={18} />,
+        children: [
+          { label: "Pending",   route: "/staff/orders/pending" },
+          { label: "Delivered", route: "/staff/orders/delivered" },
+        ],
+      },
+      {
         label: "Manage Tasks",
         route: "/staff/tasks",
         icon: <Users size={18} />,
@@ -110,9 +118,13 @@ const SideBar = ({ userType }) => {
         icon: <LayoutDashboard size={18} />,
       },
       {
-        label: "Deliveries",
-        route: "/partner/deliveries",
+        label: "My Deliveries",
         icon: <ShoppingCart size={18} />,
+        children: [
+          { label: "Pending",   route: "/partner/deliveries/pending" },
+          { label: "Picked Up", route: "/partner/deliveries/picked" },
+          { label: "Delivered", route: "/partner/deliveries/delivered" },
+        ],
       },
       {
         label: "Settings",

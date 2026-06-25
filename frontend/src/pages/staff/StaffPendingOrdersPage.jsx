@@ -103,16 +103,43 @@ export default function StaffPendingOrdersPage() {
   const fetchOrders = useCallback(async (page, searchVal) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ status: "PENDING", page, limit: pageSize });
-      if (searchVal) params.set("search", searchVal);
-      const res = await fetch(`/api/orders/staff?${params}`);
-      if (!res.ok) throw new Error("Fetch failed");
-      const data = await res.json();
-      const list  = data.orders ?? data.content ?? [];
-      const total = data.total ?? data.totalElements ?? list.length;
-      setOrders(list);
+      // Fetch PENDING and IN_TRANSIT in parallel — both count as "active" orders
+      const buildParams = (status) => {
+        const p = new URLSearchParams({ status, page, limit: pageSize });
+        if (searchVal) p.set("search", searchVal);
+        return p.toString();
+      };
+
+      const [pendingRes, transitRes] = await Promise.all([
+        fetch(`/api/orders/staff?${buildParams("PENDING")}`),
+        fetch(`/api/orders/staff?${buildParams("IN_TRANSIT")}`),
+      ]);
+
+      if (!pendingRes.ok && !transitRes.ok) throw new Error("Fetch failed");
+
+      const pendingData = pendingRes.ok ? await pendingRes.json() : {};
+      const transitData = transitRes.ok ? await transitRes.json() : {};
+
+      const pendingList = pendingData.orders ?? pendingData.content ?? [];
+      const transitList = transitData.orders ?? transitData.content ?? [];
+
+      // Merge both lists; sort by createdAt descending if available
+      const merged = [...pendingList, ...transitList].sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) return 0;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+      const total =
+        (pendingData.total ?? pendingData.totalElements ?? pendingList.length) +
+        (transitData.total ?? transitData.totalElements ?? transitList.length);
+
+      setOrders(merged);
       setTotalItems(total);
-      setHasNextPage(data.hasNext ?? data.hasNextPage ?? list.length === pageSize);
+      // Show next page if either list has more
+      setHasNextPage(
+        (pendingData.hasNext ?? pendingData.hasNextPage ?? pendingList.length === pageSize) ||
+        (transitData.hasNext ?? transitData.hasNextPage ?? transitList.length === pageSize)
+      );
     } catch {
       setToast({ message: "Failed to load orders.", type: "error" });
     } finally {
@@ -186,17 +213,20 @@ export default function StaffPendingOrdersPage() {
                   <tr key={order.orderId} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="text-sm font-medium text-blue-500 hover:underline cursor-pointer">
-                        {order.orderId}
+                        #{order.orderId}
                       </span>
                     </td>
+                    {/* API returns senderName — use as customer identifier */}
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {order.customerEmail ?? order.senderEmail ?? "—"}
+                      {order.customerEmail ?? order.senderName ?? "—"}
                     </td>
+                    {/* pickupAddress or pickupGeo.formattedAddress */}
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-[180px] truncate">
-                      {order.pickupAddress ?? "—"}
+                      {order.pickupAddress ?? order.pickupGeo?.formattedAddress ?? "—"}
                     </td>
+                    {/* deliveryAddress or deliveryGeo.formattedAddress */}
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-[180px] truncate">
-                      {order.deliveryAddress ?? "—"}
+                      {order.deliveryAddress ?? order.deliveryGeo?.formattedAddress ?? "—"}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>

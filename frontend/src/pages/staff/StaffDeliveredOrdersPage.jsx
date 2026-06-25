@@ -83,9 +83,12 @@ export default function StaffDeliveredOrdersPage() {
     if (!orders.length) return;
     const headers = ["Order ID","Customer","Pickup Address","Delivery Address","Status","Partner","Created"];
     const rows = orders.map((o) => [
-      o.orderId, o.customerEmail ?? o.senderEmail ?? "",
-      o.pickupAddress ?? "", o.deliveryAddress ?? "",
-      o.status ?? "", o.assignedPartnerName ?? o.partnerName ?? "",
+      o.orderId,
+      o.customerEmail ?? o.senderName ?? "",
+      o.pickupAddress ?? o.pickupGeo?.formattedAddress ?? "",
+      o.deliveryAddress ?? o.deliveryGeo?.formattedAddress ?? "",
+      o.status ?? "",
+      o.assignedPartnerName ?? o.partnerName ?? "",
       o.createdAt ? new Date(o.createdAt).toLocaleDateString("en-IN") : "",
     ]);
     const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
@@ -159,17 +162,20 @@ export default function StaffDeliveredOrdersPage() {
                   <tr key={order.orderId} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="text-sm font-medium text-blue-500 hover:underline cursor-pointer">
-                        {order.orderId}
+                        #{order.orderId}
                       </span>
                     </td>
+                    {/* API returns senderName — use as customer identifier */}
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {order.customerEmail ?? order.senderEmail ?? "—"}
+                      {order.customerEmail ?? order.senderName ?? "—"}
                     </td>
+                    {/* pickupAddress or pickupGeo.formattedAddress */}
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-[180px] truncate">
-                      {order.pickupAddress ?? "—"}
+                      {order.pickupAddress ?? order.pickupGeo?.formattedAddress ?? "—"}
                     </td>
+                    {/* deliveryAddress or deliveryGeo.formattedAddress */}
                     <td className="px-4 py-3 text-sm text-gray-600 max-w-[180px] truncate">
-                      {order.deliveryAddress ?? "—"}
+                      {order.deliveryAddress ?? order.deliveryGeo?.formattedAddress ?? "—"}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
