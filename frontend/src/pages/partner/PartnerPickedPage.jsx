@@ -1,7 +1,43 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Layout from "../../components/Layout";
-// import StatusUpdateModal from "./StatusUpdateModal";
 import Toast from "../../components/Toast";
+
+// Inline confirmation modal
+function StatusUpdateModal({ order, nextStatus, onConfirm, onCancel, loading }) {
+  if (!order) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">Confirm Status Update</h2>
+        <p className="text-sm text-gray-600 mb-1">
+          Order <span className="font-medium text-gray-900">{order.orderId}</span>
+        </p>
+        <p className="text-sm text-gray-600 mb-6">
+          Mark as <span className="font-semibold text-gray-900">{nextStatus?.replace(/_/g, " ")}</span>?{" "}
+          <span className="text-red-500">This cannot be undone.</span>
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gray-900 rounded-xl hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PartnerPickedPage() {
   const [orders, setOrders]     = useState([]);

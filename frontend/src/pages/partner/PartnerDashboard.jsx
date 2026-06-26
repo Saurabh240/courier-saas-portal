@@ -11,21 +11,21 @@ export default function PartnerDashboard() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [pendingRes, pickedRes, deliveredRes] = await Promise.all([
+        // Use dashboard stats for counts + pending orders for Next Pickups list
+        const [statsRes, pendingRes] = await Promise.all([
+          fetch("/api/dashboard/stats"),
           fetch("/api/orders/partner?status=PENDING&limit=5"),
-          fetch("/api/orders/partner?status=IN_TRANSIT&limit=1"),
-          fetch("/api/orders/partner?status=DELIVERED&limit=1"),
         ]);
-        const pd = pendingRes.ok   ? await pendingRes.json()   : {};
-        const id = pickedRes.ok    ? await pickedRes.json()    : {};
-        const dd = deliveredRes.ok ? await deliveredRes.json() : {};
+
+        const statsData   = statsRes.ok   ? await statsRes.json()   : {};
+        const pendingData = pendingRes.ok  ? await pendingRes.json() : {};
 
         setCounts({
-          pending:        pd.total ?? pd.totalElements ?? 0,
-          inTransit:      id.total ?? id.totalElements ?? 0,
-          deliveredToday: dd.deliveredToday ?? dd.total ?? dd.totalElements ?? 0,
+          pending:        statsData.statusCountMap?.PENDING    ?? 0,
+          inTransit:      statsData.inTransit                  ?? statsData.statusCountMap?.IN_TRANSIT ?? 0,
+          deliveredToday: statsData.delivered                  ?? 0,
         });
-        setNextPickups(pd.orders ?? pd.content ?? []);
+        setNextPickups(pendingData.orders ?? pendingData.content ?? []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -153,35 +153,8 @@ export default function PartnerDashboard() {
             ))}
           </div>
         ) : (
-          /* Fallback sample rows matching the screenshot */
-          <div className="divide-y divide-gray-100">
-            {[
-              { orderId: "ORD-2024-08472", tw: "Morning 8–12",   tc: "bg-yellow-100 text-yellow-700", addr: "12, Connaught Place, New Delhi", day: "Today" },
-              { orderId: "ORD-2024-08465", tw: "Afternoon 12–5", tc: "bg-orange-100 text-orange-700", addr: "6, Gomti Nagar, Lucknow",        day: "Today" },
-              { orderId: "ORD-2024-08463", tw: "Evening 5–9",    tc: "bg-purple-100 text-purple-700", addr: "5, Civil Lines, Jaipur",          day: "Tomorrow" },
-            ].map((row) => (
-              <div key={row.orderId} className="flex items-center justify-between px-6 py-5">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold text-gray-900">{row.orderId}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${row.tc}`}>{row.tw}</span>
-                  </div>
-                  <p className="text-sm text-gray-500 flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    {row.addr}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-400">{row.day}</span>
-                  <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                    Get Directions
-                  </button>
-                </div>
-              </div>
-            ))}
+          <div className="px-6 py-12 text-center text-sm text-gray-400">
+            No upcoming pickups.
           </div>
         )}
       </div>
