@@ -4,7 +4,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { Route, Routes, Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import StaffDashboard from "./pages/staff/StaffDashboard";
+import StaffPendingOrdersPage from "./pages/staff/StaffPendingOrdersPage";
+import StaffDeliveredOrdersPage from "./pages/staff/StaffDeliveredOrdersPage";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
+import PartnerPendingPage from "./pages/partner/PartnerPendingPage";
+import PartnerPickedPage from "./pages/partner/PartnerPickedPage";
+import PartnerDeliveredPage from "./pages/partner/PartnerDeliveredPage";
 import CustomerDashboard from "./pages/customer/CustomerDashboard";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
@@ -84,10 +89,18 @@ function App() {
         }
       />
       <Route
-        path="/partner"
+        path="/staff/orders/pending"
         element={
-          <PrivateRoute role="DELIVERY_PARTNER">
-            <PartnerDashboard />
+          <PrivateRoute role="STAFF">
+            <StaffPendingOrdersPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/staff/orders/delivered"
+        element={
+          <PrivateRoute role="STAFF">
+            <StaffDeliveredOrdersPage />
           </PrivateRoute>
         }
       />
@@ -96,6 +109,39 @@ function App() {
         element={
           <PrivateRoute role="CUSTOMER">
             <CustomerDashboard />
+          </PrivateRoute>
+        }
+      />
+
+       <Route
+        path="/partner"
+        element={
+          <PrivateRoute role="DELIVERY_PARTNER">
+            <PartnerDashboard />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/partner/deliveries/pending"
+        element={
+          <PrivateRoute role="DELIVERY_PARTNER">
+            <PartnerPendingPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/partner/deliveries/picked"
+        element={
+          <PrivateRoute role="DELIVERY_PARTNER">
+            <PartnerPickedPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/partner/deliveries/delivered"
+        element={
+          <PrivateRoute role="DELIVERY_PARTNER">
+            <PartnerDeliveredPage />
           </PrivateRoute>
         }
       />
