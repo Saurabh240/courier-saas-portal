@@ -34,6 +34,32 @@ public class TenantSettings {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    // ── SMTP (per-tenant outbound email) ─────────────────────────────────────
+    @Column(name = "smtp_host")
+    private String smtpHost;
+    @Column(name = "smtp_port")
+    private Integer smtpPort;
+    @Column(name = "smtp_user")
+    private String smtpUser;
+    /** AES-256 encrypted SMTP password (base64-encoded ciphertext). */
+    @Column(name = "smtp_password_enc")
+    private String smtpPasswordEnc;
+    @Column(name = "smtp_tls")
+    private Boolean smtpTls;
+    @Column(name = "email_enabled")
+    private Boolean emailEnabled;
+
+    // ── Twilio (per-tenant SMS) ───────────────────────────────────────────────
+    @Column(name = "twilio_account_sid")
+    private String twilioAccountSid;
+    /** AES-256 encrypted Twilio auth token (base64-encoded ciphertext). */
+    @Column(name = "twilio_auth_token_enc")
+    private String twilioAuthTokenEnc;
+    @Column(name = "twilio_from_number")
+    private String twilioFromNumber;
+    @Column(name = "sms_enabled")
+    private Boolean smsEnabled;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
