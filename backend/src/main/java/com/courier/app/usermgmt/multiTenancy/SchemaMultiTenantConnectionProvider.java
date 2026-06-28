@@ -26,16 +26,19 @@ public class SchemaMultiTenantConnectionProvider implements MultiTenantConnectio
     public Connection getConnection(Object tenantIdentifier) throws SQLException {
         final Connection connection = getAnyConnection();
         try {
-            connection.createStatement().execute("SET SCHEMA '" + tenantIdentifier + "'");
+            connection.createStatement().execute(
+                    "SET search_path TO \"" + tenantIdentifier + "\", public"
+            );
         } catch (SQLException e) {
             throw new RuntimeException("Could not alter JDBC connection to schema: " + tenantIdentifier, e);
         }
         return connection;
     }
+
     @Override
     public void releaseConnection(Object tenantIdentifier, Connection connection) throws SQLException {
         try {
-            connection.createStatement().execute("SET SCHEMA 'public'");
+            connection.createStatement().execute("SET search_path TO public");
         } finally {
             releaseAnyConnection(connection);
         }
