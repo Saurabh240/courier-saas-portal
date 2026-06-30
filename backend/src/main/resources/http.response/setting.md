@@ -1,61 +1,157 @@
 # 📦 Tenant Settings API – Test Results
 
-## 🔄 Endpoint: Create new settings
+**Base URL**: `http://localhost:8080/api/admin/settings`
+**Required Headers (all requests)**: `Authorization: Bearer <jwt>`, `X-Tenant-ID: tenant1`, `Content-Type: application/json`
+
+---
+
+## 🔄 Endpoint: Create tenant (prerequisite)
 
 ### ✅ Request Details
 
 - **Type**: POST
-- **URL**: http://localhost:8080/api/admin/settings
-- **Request Name**: Create new settings
+- **URL**: http://localhost:8080/api/admin/settings/tenants?tenantId=tenant1
+- **Request Name**: Create tenant1
 
-### 📤 Request Body (JSON)
-```json
-{ "businessHours": { "mon": "10-19", "tue": "10-19", "wed": "10-19", "thu": "10-19", "fri": "10-19", "sat": "11-15", "sun": "closed" }, "brandName": "Sai logistics", "logoUrl": "https://cdn.example.com/logos/updated.png", "primaryColor": "#123456", "secondaryColor": "#654321", "timezone": "Asia/Kolkata" }
+### 📤 Response Body
+
+```
+Tenant 'tenant1' created successfully.
 ```
 
-### 📤 Response Body (JSON) 
-```json
-{ "businessHours": { "mon": "10-19", "tue": "10-19", "wed": "10-19", "thu": "10-19", "fri": "10-19", "sat": "11-15", "sun": "closed" }, "brandName": "Sai logistics", "logoUrl": "https://cdn.example.com/logos/updated.png", "primaryColor": "#123456", "secondaryColor": "#654321", "timezone": "Asia/Kolkata" }
-```
 - **Response Status**: 200 OK
-----
-## 🔄 Endpoint: Fetch current tenant settings
+
+---
+
+## 🔄 Endpoint: Fetch settings (first access, auto-creates defaults)
 
 ### ✅ Request Details
 
 - **Type**: GET
 - **URL**: http://localhost:8080/api/admin/settings
-- **Request Name**: Fetch current tenant settings
-  ### 📤 Response Body (JSON) 
+- **Request Name**: Fetch settings - first access
+
+### 📤 Response Body (JSON)
+
 ```json
-{ "businessHours": { "mon": "10-19", "tue": "10-19", "wed": "10-19", "thu": "10-19", "fri": "10-19", "sat": "11-15", "sun": "closed" }, "brandName": "Sai logistics", "logoUrl": "https://cdn.example.com/logos/updated.png", "primaryColor": "#123456", "secondaryColor": "#654321", "timezone": "Asia/Kolkata" }
+{
+  "businessHours": {
+    "MON": { "open": "09:00", "close": "18:00" },
+    "TUE": { "open": "09:00", "close": "18:00" },
+    "WED": { "open": "09:00", "close": "18:00" },
+    "THU": { "open": "09:00", "close": "18:00" },
+    "FRI": { "open": "09:00", "close": "18:00" }
+  },
+  "brandName": "Default Courier",
+  "logoUrl": "https://cdn.yourapp.com/images/default-logo.png",
+  "primaryColor": "#0000FF",
+  "secondaryColor": "#FFFFFF",
+  "timezone": "UTC"
+}
 ```
+
 - **Response Status**: 200 OK
-----
-## 🔄 Endpoint: Update existing settings
+
+---
+
+## 🔄 Endpoint: Update settings (valid full update)
 
 ### ✅ Request Details
 
 - **Type**: PUT
 - **URL**: http://localhost:8080/api/admin/settings
-- **Request Name**: Update existing settings
-  ### 📤 Request Body (JSON)
+- **Request Name**: Update settings - valid
+
+### 📤 Request Body (JSON)
+
 ```json
-{ "businessHours": { "mon": "10-19", "tue": "10-19", "wed": "10-19", "thu": "10-19", "fri": "10-19", "sat": "11-15", "sun": "closed" }, "brandName": "Rothesay", "logoUrl": "https://cdn.example.com/logos/updated.png", "primaryColor": "#123456", "secondaryColor": "#654321", "timezone": "Asia/Kolkata" }
+{
+  "businessHours": {
+    "MON": { "open": "09:00", "close": "18:00" },
+    "TUE": { "open": "09:00", "close": "18:00" },
+    "SUN": { "open": "10:00", "close": "14:00" }
+  },
+  "brandName": "Sai Logistics",
+  "logoUrl": "https://cdn.example.com/logos/updated.png",
+  "primaryColor": "#123456",
+  "secondaryColor": "#654321",
+  "timezone": "Asia/Kolkata"
+}
 ```
- ### 📤 Response Body (JSON) 
+
+### 📤 Response Body (JSON)
+
 ```json
-{ "businessHours": { "mon": "10-19", "tue": "10-19", "wed": "10-19", "thu": "10-19", "fri": "10-19", "sat": "11-15", "sun": "closed" }, "brandName": "Rothesay", "logoUrl": "https://cdn.example.com/logos/updated.png", "primaryColor": "#123456", "secondaryColor": "#654321", "timezone": "Asia/Kolkata" }
+{
+  "businessHours": {
+    "MON": { "open": "09:00", "close": "18:00" },
+    "TUE": { "open": "09:00", "close": "18:00" },
+    "SUN": { "open": "10:00", "close": "14:00" }
+  },
+  "brandName": "Sai Logistics",
+  "logoUrl": "https://cdn.example.com/logos/updated.png",
+  "primaryColor": "#123456",
+  "secondaryColor": "#654321",
+  "timezone": "Asia/Kolkata"
+}
 ```
+
 - **Response Status**: 200 OK
-- ----
-## 🔄 Endpoint: Delete Settings
+
+---
+
+## 🔄 Endpoint: Partial update settings (businessHours only)
+
+### ✅ Request Details
+
+- **Type**: PATCH
+- **URL**: http://localhost:8080/api/admin/settings
+- **Request Name**: Patch settings - businessHours only
+
+### 📤 Request Body (JSON)
+
+```json
+{
+  "businessHours": {
+    "MON": { "open": "08:00", "close": "20:00" }
+  }
+}
+```
+
+### 📤 Response Body (JSON)
+
+```json
+{
+  "businessHours": {
+    "MON": { "open": "08:00", "close": "20:00" }
+  },
+  "brandName": "Rothesay",
+  "logoUrl": "https://cdn.example.com/logos/updated.png",
+  "primaryColor": "#123456",
+  "secondaryColor": "#654321",
+  "timezone": "Asia/Kolkata"
+}
+```
+
+- **Response Status**: 200 OK
+
+---
+
+## 🔄 Endpoint: Delete settings
 
 ### ✅ Request Details
 
 - **Type**: DELETE
-- **URL**:  http://localhost:8080/api/admin/settings
-- **Request Name**: Delete Settings
+- **URL**: http://localhost:8080/api/admin/settings
+- **Request Name**: Delete settings
 
-- **Response Status**: 200 OK
-- - ----
+### 📤 Response Body
+
+```
+(empty body)
+```
+
+- **Response Status**: 204 No Content
+
+---
+

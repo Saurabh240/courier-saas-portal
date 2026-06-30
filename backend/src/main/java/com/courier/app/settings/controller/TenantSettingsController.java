@@ -2,11 +2,14 @@ package com.courier.app.settings.controller;
 
 import com.courier.app.settings.dto.TenantSettingsDTO;
 import com.courier.app.settings.service.TenantSettingsService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/settings")
@@ -23,17 +26,18 @@ public class TenantSettingsController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
-    public TenantSettingsDTO updateSettings(@RequestBody TenantSettingsDTO dto) {
-        return service.saveOrUpdateSettings(dto);
+    public TenantSettingsDTO updateSettings(@Valid @RequestBody TenantSettingsDTO dto) {
+        return service.updateSettings(dto);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
-    public TenantSettingsDTO createSettings(@RequestBody TenantSettingsDTO dto) {
-        return service.saveOrUpdateSettings(dto);
+    @PatchMapping
+    public TenantSettingsDTO patchSettings(@RequestBody Map<String, Object> updates) {
+        return service.patchSettings(updates);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping
     public void deleteSettings() {
         service.deleteSettingsForCurrentTenant();
@@ -45,5 +49,4 @@ public class TenantSettingsController {
         service.createTenant(tenantId);
         return "Tenant '" + tenantId + "' created successfully.";
     }
-
 }
