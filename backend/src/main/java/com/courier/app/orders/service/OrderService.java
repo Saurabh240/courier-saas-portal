@@ -124,6 +124,44 @@ public class OrderService {
         return repository.findByAssignedPartnerEmail(email).stream().map(this::toResponse).toList();
     }
 
+    /**
+     * All tenant orders, optionally filtered by status. Used by STAFF role.
+     * Page index is 0-based, matching the {@code page} query parameter directly.
+     */
+    public PagedOrderResponse getOrdersForStaff(int page, int size, OrderStatus status) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> result = (status != null)
+                ? repository.findByStatusOrderByCreatedAtDesc(status, pageable)
+                : repository.findAllByOrderByCreatedAtDesc(pageable);
+        return PagedOrderResponse.from(result.map(this::toResponse));
+    }
+
+    /**
+     * Orders assigned to the given partner, optionally filtered by status.
+     * Used by DELIVERY_PARTNER role; {@code partnerEmail} must be the authenticated
+     * caller's own email, never a value supplied by the client.
+     */
+    public PagedOrderResponse getOrdersForPartnerPaged(int page, int size, OrderStatus status, String partnerEmail) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> result = (status != null)
+                ? repository.findByAssignedPartnerEmailAndStatusOrderByCreatedAtDesc(partnerEmail, status, pageable)
+                : repository.findByAssignedPartnerEmailOrderByCreatedAtDesc(partnerEmail, pageable);
+        return PagedOrderResponse.from(result.map(this::toResponse));
+    }
+
+    /**
+     * Orders for the given customer, optionally filtered by status.
+     * Used by CUSTOMER role; {@code customerEmail} must be the authenticated
+     * caller's own email, never a value supplied by the client.
+     */
+    public PagedOrderResponse getOrdersForCustomerPaged(int page, int size, OrderStatus status, String customerEmail) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> result = (status != null)
+                ? repository.findByCustomerEmailAndStatusOrderByCreatedAtDesc(customerEmail, status, pageable)
+                : repository.findByCustomerEmailOrderByCreatedAtDesc(customerEmail, pageable);
+        return PagedOrderResponse.from(result.map(this::toResponse));
+    }
+
     public OrderResponse assignPartner(Long orderId, String partnerEmail) {
         Order order = repository.findById(orderId).orElseThrow();
         order.setAssignedPartnerEmail(partnerEmail);
@@ -153,11 +191,11 @@ public class OrderService {
         order.setStatus(OrderStatus.DELIVERED);
         return toResponse(repository.save(order));
     }
-  
+
     private double roundTo(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
-  
+
     private OrderDetailsResponse toDetailsResponse(Order order) {
         return new OrderDetailsResponse(
                 order.getId(),

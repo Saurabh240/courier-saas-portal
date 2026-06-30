@@ -41,6 +41,152 @@
 ```
 - **Response Status**: 200 OK
 ----
+
+## 🔄 Endpoint: Get Orders for Staff (role-scoped, paginated)
+
+### ✅ Request Details
+
+- **Type**: GET
+- **URL**: `{{baseUrl}}/api/orders/staff?status=PENDING&page=0&size=20`
+- **Request Name**: Get all orders
+  ### 📤 Response Body (JSON)
+```json
+{
+  "orders": [
+    {
+      "orderId": 8,
+      "senderName": "jin",
+      "receiverName": "you",
+      "pickupAddress": "56, delhi, TN, 600001",
+      "deliveryAddress": "80 gurgaon nagar St, karakudi,TN ,600002",
+      "paymentMode": "ONLINE",
+      "declaredValue": 1200.0,
+      "deliveryType": "SAME_DAY",
+      "status": "PENDING",
+      "invoiceStatus": null,
+      "pickupGeo": null,
+      "deliveryGeo": null
+    },
+    {
+      "orderId": 7,
+      "senderName": "jin",
+      "receiverName": "you",
+      "pickupAddress": "56, delhi, TN, 600001",
+      "deliveryAddress": "80 gurgaon nagar St, karakudi,TN ,600002",
+      "paymentMode": "ONLINE",
+      "declaredValue": 1200.0,
+      "deliveryType": "SAME_DAY",
+      "status": "PENDING",
+      "invoiceStatus": null,
+      "pickupGeo": null,
+      "deliveryGeo": null
+    },
+    {
+      "orderId": 6,
+      "senderName": "jin",
+      "receiverName": "you",
+      "pickupAddress": "56, delhi, TN, 600001",
+      "deliveryAddress": "80 gurgaon nagar St, karakudi,TN ,600002",
+      "paymentMode": "ONLINE",
+      "declaredValue": 1200.0,
+      "deliveryType": "SAME_DAY",
+      "status": "PENDING",
+      "invoiceStatus": null,
+      "pickupGeo": null,
+      "deliveryGeo": null
+    },
+    {
+      "orderId": 5,
+      "senderName": "jin",
+      "receiverName": "you",
+      "pickupAddress": "56, delhi, TN, 600001",
+      "deliveryAddress": "80 gurgaon nagar St, karakudi,TN ,600002",
+      "paymentMode": "ONLINE",
+      "declaredValue": 1200.0,
+      "deliveryType": "SAME_DAY",
+      "status": "PENDING",
+      "invoiceStatus": null,
+      "pickupGeo": null,
+      "deliveryGeo": null
+    },
+    {
+      "orderId": 1,
+      "senderName": "Iyappan",
+      "receiverName": "sai",
+      "pickupAddress": "56, chennai, TN, 600001",
+      "deliveryAddress": "80 subramaniya nagar St, karakudi,TN ,600002",
+      "paymentMode": "ONLINE",
+      "declaredValue": 1200.0,
+      "deliveryType": "SAME_DAY",
+      "status": "PENDING",
+      "invoiceStatus": null,
+      "pickupGeo": null,
+      "deliveryGeo": null
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalCount": 5,
+  "totalPages": 1
+}
+```
+- **Response Status**: 200 OK
+----
+
+## 🔄 Endpoint: Get Orders for Delivery Partner (role-scoped, paginated)
+
+### ✅ Request Details
+
+- **Type**: GET
+- **URL**: `{{baseUrl}}/api/orders/staff?status=PENDING&page=0&size=20`
+- **Request Name**: Get all orders
+  ### 📤 Response Body (JSON)
+```json
+{
+  "orders": [],
+  "page": 0,
+  "size": 20,
+  "totalCount": 0,
+  "totalPages": 0
+}
+```
+- **Response Status**: 200 OK
+----
+## 🔄 Endpoint: Get Orders for Customer (role-scoped, paginated)
+
+### ✅ Request Details
+
+- **Type**: GET
+- **URL**: `{{baseUrl}}/api/orders/customer?status=IN_TRANSIT&page=0&size=20`
+- **Request Name**: Get all orders
+  ### 📤 Response Body (JSON)
+```json
+{
+  "orders": [
+    {
+      "orderId": 3,
+      "senderName": "jin",
+      "receiverName": "you",
+      "pickupAddress": "56, delhi, TN, 600001",
+      "deliveryAddress": "80 gurgaon nagar St, karakudi,TN ,600002",
+      "paymentMode": "ONLINE",
+      "declaredValue": 1200.0,
+      "deliveryType": "SAME_DAY",
+      "status": "IN_TRANSIT",
+      "invoiceStatus": null,
+      "pickupGeo": null,
+      "deliveryGeo": null
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalCount": 1,
+  "totalPages": 1
+}
+```
+- **Response Status**: 200 OK
+----
+
 ## 🔄 Endpoint: Update order
 
 ### ✅ Request Details
